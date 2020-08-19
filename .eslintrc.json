@@ -1,0 +1,14 @@
+{
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "plugins": ["promise"],
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "rules": {
+    "no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }],
+    "promise/always-return": "off"
+  }
+}
