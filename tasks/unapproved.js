@@ -21,10 +21,17 @@ class Unapproved extends BaseCommand {
   }
 
   __buildMessage = requests => {
-    const list = requests.map(this.__buildRequestDescription).join("\n")
-    const head = `#### Hey, there is a couple of requests waiting for your review`
+    if (requests.length) {
+      const list = requests.map(this.__buildRequestDescription).join("\n")
+      const head = `#### Hey, there is a couple of requests waiting for your review`
 
-    return `${head}\n\n${list}`
+      return `${head}\n\n${list}`
+    } else {
+      return [
+        "#### Hey, there is a couple of nothing",
+        "There are no pending requests! Let's do a new one!"
+      ].join("\n\n")
+    }
   }
 
   __buildRequestDescription = request => {
