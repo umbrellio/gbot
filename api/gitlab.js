@@ -25,12 +25,32 @@ class GitLab {
     }
 
     const uri = this.__getUrl("projects", project, "merge_requests")
-    return this.__get(uri, query)
+    return this.getPaginated(uri, query)
+  }
+
+  getPaginated = (uri, query = {}) => {
+    return this.__get(uri, query).then(async results => {
+      let { headers } = results
+      let page = 1
+      let totalPages = headers['x-total-pages']
+      let allResults = results
+
+      while (totalPages !== undefined && parseInt(totalPages) > page) {
+        page += 1
+
+        let nextPageResults = await this.__get(uri, { ...query, page })
+        allResults = allResults.concat(nextPageResults)
+      }
+
+      return Promise.resolve(allResults)
+    })
   }
 
   discussions = (project, request) => {
+    const query = { page: 1, per_page: 100 }
     const uri = this.__getUrl("projects", project, "merge_requests", request, "discussions")
-    return this.__get(uri)
+
+    return this.getPaginated(uri, query)
   }
 
   __getUrl = (...parts) => url.build(this.baseUrl, ...parts)

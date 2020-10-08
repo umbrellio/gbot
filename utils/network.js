@@ -14,7 +14,8 @@ const get = (uri, params = {}, headers = {}) => new Promise((resolve, reject) =>
 
     resp.on("data", chunk => (data += chunk))
     resp.on("end", () => {
-      const json = JSON.parse(data)
+      let json = JSON.parse(data)
+      json.headers = resp.headers
       resolve(json)
     })
   }).on("error", reject)
