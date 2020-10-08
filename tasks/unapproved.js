@@ -44,11 +44,22 @@ class Unapproved extends BaseCommand {
     const unresolvedAuthors = this.__unresolvedAuthorsFor(request).map(author => {
       return `@${author.username}`
     }).join(", ")
+    const approvedBy = request.approved_by.map(approve => {
+      const { user } = approve
 
-    return [
-      `${reaction} **${link}** (${project}) by **${author}**`,
-      `unresolved threads: ${unresolvedAuthors}`
-    ].join("\n")
+      return `@${user.username}`
+    }).join(", ")
+
+    let message = [`${reaction} **${link}** (${project}) by **${author}**`]
+
+    if (!_.isEmpty(unresolvedAuthors)) {
+      message.push(`unresolved threads: ${unresolvedAuthors}`)
+    }
+    if (!_.isEmpty(approvedBy)) {
+      message.push(`approved by: ${approvedBy}`)
+    }
+
+    return message.join("\n")
   }
 
   __getEmoji = lastUpdate => {
