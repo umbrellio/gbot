@@ -41,8 +41,19 @@ class Unapproved extends BaseCommand {
     const link = `[${request.title}](${request.web_url})`
     const author = `@${request.author.username}`
     const project = `[${request.project.name}](${request.project.web_url})`
+    const unresolvedAuthors = this.__unresolvedAuthorsString(request)
+    const approvedBy = this.__approvedByString(request)
 
-    return `${reaction} **${link}** (${project}) by **${author}**`
+    let message = [`${reaction} **${link}** (${project}) by **${author}**`]
+
+    if (unresolvedAuthors.length > 0) {
+      message.push(`unresolved threads by: ${unresolvedAuthors}`)
+    }
+    if (approvedBy.length > 0) {
+      message.push(`already approved by: ${approvedBy}`)
+    }
+
+    return message.join("\n")
   }
 
   __getEmoji = lastUpdate => {
@@ -89,6 +100,44 @@ class Unapproved extends BaseCommand {
   __appendDiscussions = (project, request) => this.gitlab
     .discussions(project.id, request.iid)
     .then(discussions => ({ ...request, discussions }))
+
+  __unresolvedAuthorsString = request => {
+    return this.__unresolvedAuthorsFor(request).map(author => {
+      return `@${author.username}`
+    }).join(", ")
+  }
+
+  __approvedByString = request => {
+    return request.approved_by.map(approve => {
+      const { user } = approve
+
+      return `@${user.username}`
+    }).join(", ")
+  }
+
+  __unresolvedAuthorsFor = request => {
+    const { discussions } = request
+
+    const userNames = _.flow(
+      _.partialRight(
+        _.filter,
+        discussion => discussion.notes.some(
+          note => note.resolvable && !note.resolved
+        )
+      ),
+      _.partialRight(
+        _.map,
+        discussion => discussion.notes.map(note => note.author)
+      ),
+      _.partialRight(_.flatten),
+      _.partialRight(
+        _.uniqBy,
+        author => author.username
+      ),
+    )
+
+    return userNames(discussions)
+  }
 }
 
 module.exports = Unapproved
