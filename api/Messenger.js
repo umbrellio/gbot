@@ -1,6 +1,5 @@
 const _ = require("lodash")
 const network = require("../utils/network")
-const logger = require("../utils/logger")
 
 class Messenger {
   constructor({ messenger }) {

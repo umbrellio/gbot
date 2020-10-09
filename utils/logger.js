@@ -1,4 +1,3 @@
-const path = require("path")
 const winston = require("winston")
 
 const format = winston.format.printf(({ level, message, timestamp }) => {
@@ -10,7 +9,7 @@ const transports = [
 ]
 
 module.exports = winston.createLogger({
-  level: 'debug',
+  level: "debug",
   format: winston.format.combine(winston.format.timestamp(), format),
   exceptionHandlers: transports,
   transports,

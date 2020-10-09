@@ -30,8 +30,8 @@ const post = (to, body) => new Promise((resolve, reject) => {
     path: uri.path,
     method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(data),
+      "Content-Type": "application/json",
+      "Content-Length": Buffer.byteLength(data),
     }
   }
 

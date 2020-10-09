@@ -3,12 +3,15 @@
     "node": true,
     "es6": true
   },
+  "parser": "babel-eslint",
   "plugins": ["promise"],
   "parserOptions": {
     "ecmaVersion": 2018
   },
   "rules": {
     "no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }],
-    "promise/always-return": "off"
+    "promise/always-return": "off",
+    "arrow-parens": ["error", "as-needed"],
+    "quotes": ["error", "double"]
   }
 }
