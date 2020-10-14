@@ -5,6 +5,12 @@ const timeUtils = require("../utils/time")
 const BaseCommand = require("./BaseCommand")
 
 class Unapproved extends BaseCommand {
+  constructor(config) {
+    super(config)
+    this.emoji = this.__getConfigSetting("unapproved.emoji")
+    this.tagApprovedBy = this.__getConfigSetting("unapproved.tag_approved_by", false)
+  }
+
   perform = () => {
     const promises = this.projects.map(this.__getUnapprovedRequests)
 
@@ -57,7 +63,6 @@ class Unapproved extends BaseCommand {
   }
 
   __getEmoji = lastUpdate => {
-    const emoji = _.get(this.config, "unapproved.emoji", {})
     const interval = new Date().getTime() - lastUpdate.getTime()
 
     const findEmoji = _.flow(
@@ -68,7 +73,7 @@ class Unapproved extends BaseCommand {
       _.partialRight(_.last),
     )
 
-    return findEmoji(emoji) || emoji.default || ""
+    return findEmoji(this.emoji) || this.emoji.default || ""
   }
 
   __getUnapprovedRequests = projectId => this.__getExtendedRequests(projectId)
@@ -110,8 +115,13 @@ class Unapproved extends BaseCommand {
   __approvedByString = request => {
     return request.approved_by.map(approve => {
       const { user } = approve
+      let message = user.name
 
-      return `@${user.username}`
+      if (this.tagApprovedBy) {
+        message = `@${user.username}`
+      }
+
+      return message
     }).join(", ")
   }
 
