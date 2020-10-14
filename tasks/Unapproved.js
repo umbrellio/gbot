@@ -1,16 +1,9 @@
 const _ = require("lodash")
 
-const timeUtils = require("../utils/time")
-
 const BaseCommand = require("./BaseCommand")
+const UnapprovedRequestDescription = require("./unapproved/UnapprovedRequestDescription")
 
 class Unapproved extends BaseCommand {
-  constructor(config) {
-    super(config)
-    this.emoji = this.__getConfigSetting("unapproved.emoji")
-    this.tagApprovedBy = this.__getConfigSetting("unapproved.tag_approved_by", false)
-  }
-
   perform = () => {
     const promises = this.projects.map(this.__getUnapprovedRequests)
 
@@ -29,7 +22,7 @@ class Unapproved extends BaseCommand {
   __buildMessage = requests => {
     if (requests.length) {
       const list = requests.map(this.__buildRequestDescription).join("\n")
-      const head = "#### Hey, there is a couple of requests waiting for your review"
+      const head = "#### Hey, there are a couple of requests waiting for your review"
 
       return `${head}\n\n${list}`
     } else {
@@ -41,39 +34,9 @@ class Unapproved extends BaseCommand {
   }
 
   __buildRequestDescription = request => {
-    const updated = new Date(request.updated_at)
-    const reaction = this.__getEmoji(updated)
+    const descriptionBuilder = new UnapprovedRequestDescription(request, this.config)
 
-    const link = `[${request.title}](${request.web_url})`
-    const author = `@${request.author.username}`
-    const project = `[${request.project.name}](${request.project.web_url})`
-    const unresolvedAuthors = this.__unresolvedAuthorsString(request)
-    const approvedBy = this.__approvedByString(request)
-
-    let message = [`${reaction} **${link}** (${project}) by **${author}**`]
-
-    if (unresolvedAuthors.length > 0) {
-      message.push(`unresolved threads by: ${unresolvedAuthors}`)
-    }
-    if (approvedBy.length > 0) {
-      message.push(`already approved by: ${approvedBy}`)
-    }
-
-    return message.join("\n")
-  }
-
-  __getEmoji = lastUpdate => {
-    const interval = new Date().getTime() - lastUpdate.getTime()
-
-    const findEmoji = _.flow(
-      _.partialRight(_.toPairs),
-      _.partialRight(_.map, ([key, value]) => [timeUtils.parseInterval(key), value]),
-      _.partialRight(_.sortBy, ([time]) => -time),
-      _.partialRight(_.find, ([time]) => time < interval),
-      _.partialRight(_.last),
-    )
-
-    return findEmoji(this.emoji) || this.emoji.default || ""
+    return descriptionBuilder.build()
   }
 
   __getUnapprovedRequests = projectId => this.__getExtendedRequests(projectId)
@@ -105,49 +68,6 @@ class Unapproved extends BaseCommand {
   __appendDiscussions = (project, request) => this.gitlab
     .discussions(project.id, request.iid)
     .then(discussions => ({ ...request, discussions }))
-
-  __unresolvedAuthorsString = request => {
-    return this.__unresolvedAuthorsFor(request).map(author => {
-      return `@${author.username}`
-    }).join(", ")
-  }
-
-  __approvedByString = request => {
-    return request.approved_by.map(approve => {
-      const { user } = approve
-      let message = user.name
-
-      if (this.tagApprovedBy) {
-        message = `@${user.username}`
-      }
-
-      return message
-    }).join(", ")
-  }
-
-  __unresolvedAuthorsFor = request => {
-    const { discussions } = request
-
-    const userNames = _.flow(
-      _.partialRight(
-        _.filter,
-        discussion => discussion.notes.some(
-          note => note.resolvable && !note.resolved
-        )
-      ),
-      _.partialRight(
-        _.map,
-        discussion => discussion.notes.map(note => note.author)
-      ),
-      _.partialRight(_.flatten),
-      _.partialRight(
-        _.uniqBy,
-        author => author.username
-      ),
-    )
-
-    return userNames(discussions)
-  }
 }
 
 module.exports = Unapproved

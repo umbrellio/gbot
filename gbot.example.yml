@@ -16,4 +16,6 @@ unapproved:
     24h: ":emoji1:"
     12h: ":emoji2:"
     default: ":emoji3:"
-  tag_approved_by: false
+  tag:
+    approved_by: false
+    author: false

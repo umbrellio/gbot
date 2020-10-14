@@ -18,10 +18,6 @@ class BaseCommand {
   perform = () => {
     throw new Error("Not implemented")
   }
-
-  __getConfigSetting = (settingName, defaultValue = {}) => {
-    return _.get(this.config, settingName, defaultValue)
-  }
 }
 
 module.exports = BaseCommand
