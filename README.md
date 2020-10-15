@@ -57,6 +57,9 @@ unapproved:                            # Config for `unapproved` command
                                        # hours and days (30s, 10m, 5h, 2d)
     12h: ":emoji2:"                    # If MR's last update time more than 12 hours
     default: ":emoji3:"                # Default emoji (if other ones wasn't matched)
+  tag:                                 # Specify who will be tagged in messenger
+    approvers: false                   # Tag approvers or not (default - false)
+    author: false                      # Tag author of PR or not (default - false)
 ```
 
 ## Contributing
