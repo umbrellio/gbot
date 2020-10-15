@@ -1,5 +1,6 @@
 const _ = require("lodash")
 const timeUtils = require("../../utils/time")
+const stringUtils = require("../../utils/strings")
 
 class UnapprovedRequestDescription {
   constructor(request, config) {
@@ -33,10 +34,6 @@ class UnapprovedRequestDescription {
     return _.get(this.config, settingName, defaultValue)
   }
 
-  __wrapString = (string, condition = true) => {
-    return condition ? `\`${string}\`` : string
-  }
-
   __getEmoji = lastUpdate => {
     const emoji = this.__getConfigSetting("unapproved.emoji", {})
     const interval = new Date().getTime() - lastUpdate.getTime()
@@ -59,20 +56,28 @@ class UnapprovedRequestDescription {
   }
 
   __approvedByString = () => {
-    const tagApprovedBy = this.__getConfigSetting("unapproved.tag.approved_by", false)
+    const tagApprovers = this.__getConfigSetting("unapproved.tag.approvers", false)
 
     return this.request.approved_by.map(approve => {
       const { user } = approve
+      let message = `@${user.username}`
 
-      return this.__wrapString(`@${user.username}`, !tagApprovedBy)
+      if (!tagApprovers) {
+        message = stringUtils.wrapString(message)
+      }
+
+      return message
     }).join(", ")
   }
 
   __authorString = () => {
     const tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
-    const message = `@${this.request.author.username}`
+    let message = `@${this.request.author.username}`
 
-    return this.__wrapString(message, !tagAuthor)
+    if (!tagAuthor) {
+      message = stringUtils.wrapString(message)
+    }
+    return message
   }
 
   __unresolvedAuthorsFor = () => {
