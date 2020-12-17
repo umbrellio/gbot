@@ -13,6 +13,11 @@ class GitLab {
     return this.__get(uri)
   }
 
+  changes = (project, request) => {
+    const uri = this.__getUrl("projects", project, "merge_requests", request, "changes")
+    return this.__get(uri)
+  }
+
   project = id => this.__get(this.__getUrl("projects", id))
 
   requests = project => {

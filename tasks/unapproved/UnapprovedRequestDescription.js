@@ -1,4 +1,5 @@
 const _ = require("lodash")
+const gitUtils = require("../../utils/git")
 const timeUtils = require("../../utils/time")
 const stringUtils = require("../../utils/strings")
 
@@ -17,8 +18,11 @@ class UnapprovedRequestDescription {
     const project = `[${this.request.project.name}](${this.request.project.web_url})`
     const unresolvedAuthors = this.__unresolvedAuthorsString()
     const approvedBy = this.__approvedByString()
+    const optionalDiff = this.__optionalDiffString()
 
-    let message = [`${reaction} **${link}** (${project}) by **${author}**`]
+    const parts = [reaction, `**${link}**`, optionalDiff, `(${project})`, `by **${author}**`]
+
+    let message = [_.compact(parts).join(" ")]
 
     if (unresolvedAuthors.length > 0) {
       message.push(`unresolved threads by: ${unresolvedAuthors}`)
@@ -80,6 +84,18 @@ class UnapprovedRequestDescription {
     return message
   }
 
+  __optionalDiffString = () => {
+    const showDiff = this.__getConfigSetting("unapproved.diffs", false)
+
+    if (showDiff) {
+      const [ insertions, deletions ] = this.__getTotalDiff()
+
+      return stringUtils.wrapString(`+${insertions} -${deletions}`)
+    }
+
+    return ""
+  }
+
   __unresolvedAuthorsFor = () => {
     const { discussions } = this.request
 
@@ -102,6 +118,19 @@ class UnapprovedRequestDescription {
     )
 
     return userNames(discussions)
+  }
+
+  __getTotalDiff = () => {
+    const { changes } = this.request
+
+    const mapDiffs = ({ diff }) => gitUtils.diffToNumericMap(diff)
+
+    return _.flow(
+      _.partialRight(_.map, mapDiffs),
+      _.flatten,
+      _.unzip,
+      _.partialRight(_.map, _.sum),
+    )(changes)
   }
 }
 
