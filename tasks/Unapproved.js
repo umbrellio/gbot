@@ -58,12 +58,17 @@ class Unapproved extends BaseCommand {
 
   __getExtendedRequest = (project, request) => Promise.resolve(request)
     .then(req => this.__appendApprovals(project, req))
+    .then(req => this.__appendChanges(project, req))
     .then(req => this.__appendDiscussions(project, req))
     .then(req => ({ ...req, project }))
 
   __appendApprovals = (project, request) => this.gitlab
     .approvals(project.id, request.iid)
     .then(approvals => ({ ...approvals, ...request }))
+
+  __appendChanges = (project, request) => this.gitlab
+    .changes(project.id, request.iid)
+    .then(changes => ({ ...changes, ...request }))
 
   __appendDiscussions = (project, request) => this.gitlab
     .discussions(project.id, request.iid)
