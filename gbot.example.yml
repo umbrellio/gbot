@@ -19,5 +19,5 @@ unapproved:
   tag:
     approvers: false
     author: false
-    diffs: false
     commenters: false
+  diffs: false
