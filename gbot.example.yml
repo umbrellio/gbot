@@ -19,3 +19,4 @@ unapproved:
   tag:
     approvers: false
     author: false
+    commenters: false
