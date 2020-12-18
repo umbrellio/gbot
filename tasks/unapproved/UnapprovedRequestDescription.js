@@ -20,7 +20,7 @@ class UnapprovedRequestDescription {
     const approvedBy = this.__approvedByString()
     const optionalDiff = this.__optionalDiffString()
 
-    const parts = [reaction, `**${link}**`, optionalDiff, `(${project})`, `by **${author}**`]
+    const parts = [reaction, optionalDiff, `**${link}**`, `(${project})`, `by **${author}**`]
 
     let message = [_.compact(parts).join(" ")]
 
