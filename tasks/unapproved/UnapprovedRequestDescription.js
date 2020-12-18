@@ -97,7 +97,15 @@ class UnapprovedRequestDescription {
   }
 
   __unresolvedAuthorsFor = () => {
+    const tagCommenters = this.__getConfigSetting("unapproved.tag.commenters", false)
+
     const { discussions } = this.request
+
+    const selectNotes = discussion => {
+      const [issueNote, ...comments] = discussion.notes
+
+      return tagCommenters ? [issueNote, ...comments] : [issueNote]
+    }
 
     const userNames = _.flow(
       _.partialRight(
@@ -106,9 +114,10 @@ class UnapprovedRequestDescription {
           note => note.resolvable && !note.resolved
         )
       ),
+      _.partialRight(_.map, selectNotes),
       _.partialRight(
         _.map,
-        discussion => discussion.notes.map(note => note.author)
+        notes => notes.map(note => note.author)
       ),
       _.partialRight(_.flatten),
       _.partialRight(
