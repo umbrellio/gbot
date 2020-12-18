@@ -102,9 +102,9 @@ class UnapprovedRequestDescription {
     const { discussions } = this.request
 
     const selectNotes = discussion => {
-      const [issue, ...comments] = discussion.notes
+      const [issueNote, ...comments] = discussion.notes
 
-      return tagCommenters ? [issue, ...comments] : [issue]
+      return tagCommenters ? [issueNote, ...comments] : [issueNote]
     }
 
     const userNames = _.flow(
