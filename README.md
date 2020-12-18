@@ -18,7 +18,7 @@ $ npm i @umbrellio/gbot
 
 ### `unapproved`
 
-Sends unapproved MR to mattermost / slack. MR will be ignored if it has WIP mark.
+Sends unapproved MRs to mattermost / slack. MR will be ignored if it has `Draft`/`WIP` mark.
 
 ```sh
 $ gbot unapproved -c /path/to/config/gbot.yaml
@@ -27,7 +27,7 @@ $ gbot unapproved -c /path/to/config/gbot.yaml
 ## Configuration
 
 Each setting can be set via environment variables.
-Each variable must starts with `GBOT_` prefix. Each double underline will be interpreted as nesting, for example:
+Each variable must start with `GBOT_` prefix. Double underscore is interpreted as nesting, for example:
 
 ```sh
 GBOT_GITLAB_TOKEN=token # { "gitlabToken": "token" }
@@ -60,6 +60,8 @@ unapproved:                            # Config for `unapproved` command
   tag:                                 # Specify who will be tagged in messenger
     approvers: false                   # Tag approvers or not (default - false)
     author: false                      # Tag author of PR or not (default - false)
+    commenters: false                  # Tag thread commenters or not (default - false)
+  diffs: false                         # Show changed lines count or not (default - false)
 ```
 
 ## Contributing
