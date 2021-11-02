@@ -5,6 +5,12 @@ const yaml = require("js-yaml")
 
 const PREFIX_REGEX = /^GBOT_/
 
+const defaultConfig = {
+  messenger: {
+    markup: "markdown",
+  },
+}
+
 const parseEnvValue = value => {
   try {
     return JSON.parse(value)
@@ -36,7 +42,7 @@ const load = filePath => {
   const fileConfig = getFileConfig(filePath)
   const envConfig = getEnvConfig()
 
-  return _.merge(fileConfig, envConfig)
+  return _.merge(defaultConfig, fileConfig, envConfig)
 }
 
 module.exports = { load }

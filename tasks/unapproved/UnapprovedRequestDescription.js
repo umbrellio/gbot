@@ -2,6 +2,7 @@ const _ = require("lodash")
 const gitUtils = require("../../utils/git")
 const timeUtils = require("../../utils/time")
 const stringUtils = require("../../utils/strings")
+const markupUtils = require("../../utils/markup")
 
 class UnapprovedRequestDescription {
   constructor (request, config) {
@@ -10,28 +11,42 @@ class UnapprovedRequestDescription {
   }
 
   build = () => {
-    const updated = new Date(this.request.updated_at)
-    const reaction = this.__getEmoji(updated)
+    const markup = markupUtils[this.config.messenger.markup]
 
-    const link = `[${this.request.title}](${this.request.web_url})`
+    const updated = new Date(this.request.updated_at)
+
+    const reaction = this.__getEmoji(updated)
+    const link = markup.makeLink(this.request.title, this.request.web_url)
     const author = this.__authorString()
-    const project = `[${this.request.project.name}](${this.request.project.web_url})`
+    const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
     const unresolvedAuthors = this.__unresolvedAuthorsString()
     const approvedBy = this.__approvedByString()
     const optionalDiff = this.__optionalDiffString()
 
-    const parts = [reaction, `**${link}**`, optionalDiff, `(${project})`, `by **${author}**`]
-
-    const message = [_.compact(parts).join(" ")]
+    const requestMessageParts = [
+      reaction,
+      markup.makeBold(link),
+      optionalDiff,
+      `(${projectLink})`,
+      `by ${markup.makeBold(author)}`,
+    ]
+    const requestMessageText = _.compact(requestMessageParts).join(" ")
+    const message = [markup.makeText(requestMessageText, { withMentions: false })]
 
     if (unresolvedAuthors.length > 0) {
-      message.push(`unresolved threads by: ${unresolvedAuthors}`)
+      const text = `unresolved threads by: ${unresolvedAuthors}`
+      const msg = markup.makeText(text, { withMentions: true })
+
+      message.push(msg)
     }
     if (approvedBy.length > 0) {
-      message.push(`already approved by: ${approvedBy}`)
+      const text = `already approved by: ${approvedBy}`
+      const msg = markup.makeText(text, { withMentions: false })
+
+      message.push(msg)
     }
 
-    return message.join("\n")
+    return markup.addLineBreaks(message)
   }
 
   __getConfigSetting = (settingName, defaultValue = null) => {

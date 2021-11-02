@@ -4,6 +4,7 @@ const BaseCommand = require("./BaseCommand")
 const UnapprovedRequestDescription = require("./unapproved/UnapprovedRequestDescription")
 
 const logger = require("../utils/logger")
+const markupUtils = require("../utils/markup")
 
 class Unapproved extends BaseCommand {
   perform = () => {
@@ -26,16 +27,25 @@ class Unapproved extends BaseCommand {
   }
 
   __buildMessage = requests => {
-    if (requests.length) {
-      const list = requests.map(this.__buildRequestDescription).join("\n")
-      const head = "#### Hey, there are a couple of requests waiting for your review"
+    const markup = markupUtils[this.config.messenger.markup]
 
-      return `${head}\n\n${list}`
+    if (requests.length) {
+      const list = requests.map(this.__buildRequestDescription).map(markup.addDivider)
+      const headText = "Hey, there are a couple of requests waiting for your review"
+
+      const header = markup.makeHeader(headText)
+      const bodyParts = markup.flatten(list)
+
+      const message = markup.composeMsg(header, bodyParts)
+      return message
     } else {
-      return [
-        "#### Hey, there is a couple of nothing",
-        "There are no pending requests! Let's do a new one!",
-      ].join("\n\n")
+      const headText = "Hey, there is a couple of nothing"
+      const bodyText = "There are no pending requests! Let's do a new one!"
+
+      const header = markup.makeHeader(headText)
+      const body = markup.makeText(bodyText)
+      const message = markup.composeMsg(header, body)
+      return message
     }
   }
 

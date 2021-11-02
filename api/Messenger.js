@@ -9,9 +9,9 @@ class Messenger {
     this.icon = _.get(messenger, "sender.icon", null)
   }
 
-  send = text => {
+  send = content => {
     const message = {
-      text,
+      ...content,
       channel: this.channel,
       username: this.username,
       icon_url: this.icon,
