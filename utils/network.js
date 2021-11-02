@@ -19,7 +19,7 @@ const get = (uri, params = {}, headers = {}) => new Promise((resolve, reject) =>
       const json = JSON.parse(data)
 
       if (isErrorStatus(resp.statusCode)) {
-        const message = json.message || `${resp.statusCode} Network Error`
+        const message = data || `${resp.statusCode} Network Error`
         const error = new Error(`Got '${message}' message for '${uri}' request`)
         return reject(error)
       }
@@ -49,6 +49,12 @@ const post = (to, body) => new Promise((resolve, reject) => {
     let data = ""
     resp.on("data", chunk => (data += chunk))
     resp.on("end", () => {
+      if (isErrorStatus(resp.statusCode)) {
+        const message = data || `${resp.statusCode} Network Error`
+        const error = new Error(`Got '${message}' message for '${uri}' request`)
+        return reject(error)
+      }
+
       resolve(data)
     })
   })
