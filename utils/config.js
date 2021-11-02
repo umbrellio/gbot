@@ -20,7 +20,7 @@ const parseEnvKey = key => {
 const getFileConfig = filePath => {
   const configPath = path.resolve(filePath)
   const content = fs.readFileSync(configPath)
-  return yaml.safeLoad(content)
+  return yaml.load(content)
 }
 
 const getEnvConfig = () => Object

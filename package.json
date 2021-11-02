@@ -7,17 +7,23 @@
   "homepage": "https://github.com/umbrellio/gbot",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "js-yaml": "^3.14.0",
-    "lodash": "^4.17.20",
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
     "winston": "^3.3.3",
-    "yargs": "^15.4.1"
+    "yargs": "^17.2.1"
   },
   "devDependencies": {
-    "babel-eslint": "^10.1.0",
-    "eslint": "^7.7.0",
-    "eslint-plugin-promise": "^4.2.1"
+    "@babel/core": "^7.14.6",
+    "@babel/eslint-parser": "^7.16.0",
+    "eslint": "^8.1.0",
+    "eslint-config-umbrellio": "^5.0.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prefer-object-spread": "^1.2.1",
+    "eslint-plugin-promise": "^5.1.1"
   }
 }

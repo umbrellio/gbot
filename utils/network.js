@@ -16,11 +16,12 @@ const get = (uri, params = {}, headers = {}) => new Promise((resolve, reject) =>
 
     resp.on("data", chunk => (data += chunk))
     resp.on("end", () => {
-      let json = JSON.parse(data)
+      const json = JSON.parse(data)
 
       if (isErrorStatus(resp.statusCode)) {
         const message = json.message || `${resp.statusCode} Network Error`
-        return reject(`Got '${message}' message for '${uri}' request`)
+        const error = new Error(`Got '${message}' message for '${uri}' request`)
+        return reject(error)
       }
 
       json.headers = resp.headers
@@ -30,18 +31,17 @@ const get = (uri, params = {}, headers = {}) => new Promise((resolve, reject) =>
 })
 
 const post = (to, body) => new Promise((resolve, reject) => {
-  const uri = url.parse(to)
+  const uri = new url.URL(to)
   const data = JSON.stringify(body)
   const request = {
-    ...uri,
     host: uri.host,
     port: uri.port,
-    path: uri.path,
+    path: uri.pathname,
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "Content-Length": Buffer.byteLength(data),
-    }
+    },
   }
 
   logger.debug(`POST ${to} ${data}`)

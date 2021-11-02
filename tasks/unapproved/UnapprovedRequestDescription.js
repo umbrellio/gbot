@@ -4,7 +4,7 @@ const timeUtils = require("../../utils/time")
 const stringUtils = require("../../utils/strings")
 
 class UnapprovedRequestDescription {
-  constructor(request, config) {
+  constructor (request, config) {
     this.config = config
     this.request = request
   }
@@ -22,7 +22,7 @@ class UnapprovedRequestDescription {
 
     const parts = [reaction, `**${link}**`, optionalDiff, `(${project})`, `by **${author}**`]
 
-    let message = [_.compact(parts).join(" ")]
+    const message = [_.compact(parts).join(" ")]
 
     if (unresolvedAuthors.length > 0) {
       message.push(`unresolved threads by: ${unresolvedAuthors}`)
@@ -111,18 +111,18 @@ class UnapprovedRequestDescription {
       _.partialRight(
         _.filter,
         discussion => discussion.notes.some(
-          note => note.resolvable && !note.resolved
-        )
+          note => note.resolvable && !note.resolved,
+        ),
       ),
       _.partialRight(_.map, selectNotes),
       _.partialRight(
         _.map,
-        notes => notes.map(note => note.author)
+        notes => notes.map(note => note.author),
       ),
       _.partialRight(_.flatten),
       _.partialRight(
         _.uniqBy,
-        author => author.username
+        author => author.username,
       ),
     )
 

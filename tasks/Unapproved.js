@@ -34,7 +34,7 @@ class Unapproved extends BaseCommand {
     } else {
       return [
         "#### Hey, there is a couple of nothing",
-        "There are no pending requests! Let's do a new one!"
+        "There are no pending requests! Let's do a new one!",
       ].join("\n\n")
     }
   }

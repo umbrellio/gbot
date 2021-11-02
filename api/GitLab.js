@@ -2,7 +2,7 @@ const url = require("../utils/url")
 const network = require("../utils/network")
 
 class GitLab {
-  constructor({ gitlab }) {
+  constructor ({ gitlab }) {
     this.baseUrl = gitlab.url
     this.token = gitlab.token
     this.projects = gitlab.projects
@@ -47,7 +47,7 @@ class GitLab {
   __getPaginated = (uri, query = {}) => {
     return this.__get(uri, query).then(async results => {
       const { headers } = results
-      const totalPages = parseInt(headers["x-total-pages"]) || 1
+      const totalPages = parseInt(headers["x-total-pages"], 10) || 1
 
       let page = 1
       let allResults = results

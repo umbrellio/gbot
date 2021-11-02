@@ -6,7 +6,7 @@ const GitLab = require("../api/GitLab")
 const Messenger = require("../api/Messenger")
 
 class BaseCommand {
-  constructor(config) {
+  constructor (config) {
     this.config = config
     this.logger = logger
     this.gitlab = new GitLab(config)
