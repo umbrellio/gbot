@@ -3,6 +3,8 @@ const _ = require("lodash")
 const BaseCommand = require("./BaseCommand")
 const UnapprovedRequestDescription = require("./unapproved/UnapprovedRequestDescription")
 
+const logger = require("../utils/logger")
+
 class Unapproved extends BaseCommand {
   perform = () => {
     const promises = this.projects.map(this.__getUnapprovedRequests)
@@ -17,6 +19,10 @@ class Unapproved extends BaseCommand {
         return message
       })
       .then(this.messenger.send)
+      .catch(err => {
+        logger.error(err)
+        process.exit(1)
+      })
   }
 
   __buildMessage = requests => {

@@ -4,6 +4,8 @@ const url = require("url")
 
 const logger = require("./logger")
 
+const isErrorStatus = status => status >= 400
+
 const get = (uri, params = {}, headers = {}) => new Promise((resolve, reject) => {
   const query = qs.stringify(params)
   const options = { headers }
@@ -15,6 +17,12 @@ const get = (uri, params = {}, headers = {}) => new Promise((resolve, reject) =>
     resp.on("data", chunk => (data += chunk))
     resp.on("end", () => {
       let json = JSON.parse(data)
+
+      if (isErrorStatus(resp.statusCode)) {
+        const message = json.message || `${resp.statusCode} Network Error`
+        return reject(`Got '${message}' message for '${uri}' request`)
+      }
+
       json.headers = resp.headers
       resolve(json)
     })
