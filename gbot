@@ -7,13 +7,15 @@ const configUtils = require("./utils/config")
 
 const Unapproved = require("./tasks/Unapproved")
 
-const runCommand = klass => argv => {
+const runCommand = Klass => argv => {
   const config = configUtils.load(argv.config)
-   return new klass(config).perform()
+  return new Klass(config).perform()
 }
 
-yargs
-  .command("unapproved", "sends unapproved requests to Mattermost / Slack", {}, runCommand(Unapproved))
+yargs // eslint-disable-line no-unused-expressions
+  .command(
+    "unapproved", "sends unapproved requests to Mattermost / Slack", {}, runCommand(Unapproved),
+  )
   .demandCommand(1, "must provide a valid command")
   .options({
     config: {

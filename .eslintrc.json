@@ -1,12 +1,16 @@
 {
   "env": {
     "node": true,
-    "es6": true
+    "es2021": true
   },
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
+  "extends": [
+    "umbrellio"
+  ],
   "plugins": ["promise"],
   "parserOptions": {
-    "ecmaVersion": 2018
+    "ecmaVersion": 2021,
+    "requireConfigFile": false
   },
   "rules": {
     "no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }],

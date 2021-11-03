@@ -1,6 +1,7 @@
 messenger:
   webhook: "<WEBHOOK URL>"
   channel: "<CHANNEL>"
+  markup: slack
   sender:
     username: "@ubmrellio/gbot"
     icon: "<icon url>"

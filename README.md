@@ -40,6 +40,10 @@ Example of the config file:
 messenger:
   webhook: "<WEBHOOK URL>"             # Mattermost / Slack webhook
   channel: "<CHANNEL>"                 # Mattermost / Slack channel where will be messages sent
+  markup: "slack"                      # Messenger markup (default - "markdown").
+                                       # Possible values:
+                                       # - "markdown" (for Mattermost)
+                                       # - "slack" (for Slack)
   sender:
     username: "@ubmrellio/gbot"        # Sender's display name
     icon: "<icon url>"                 # Sender's icon url
