@@ -1,4 +1,3 @@
-
 class NetworkError extends Error {
   constructor (message, status) {
     super(message)
