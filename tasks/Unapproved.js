@@ -43,7 +43,7 @@ class Unapproved extends BaseCommand {
       const bodyText = "There are no pending requests! Let's do a new one!"
 
       const header = markup.makeHeader(headText)
-      const body = markup.makeText(bodyText)
+      const body = markup.makePrimaryInfo(markup.makeText(bodyText))
       const message = markup.composeMsg(header, body)
       return message
     }

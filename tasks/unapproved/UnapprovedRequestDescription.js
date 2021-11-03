@@ -31,22 +31,28 @@ class UnapprovedRequestDescription {
       `by ${markup.makeBold(author)}`,
     ]
     const requestMessageText = _.compact(requestMessageParts).join(" ")
-    const message = [markup.makeText(requestMessageText, { withMentions: false })]
+    const primaryMessage = markup.makePrimaryInfo(
+      markup.makeText(requestMessageText, { withMentions: false }),
+    )
+    const secondaryMessageParts = []
 
     if (unresolvedAuthors.length > 0) {
       const text = `unresolved threads by: ${unresolvedAuthors}`
       const msg = markup.makeText(text, { withMentions: true })
 
-      message.push(msg)
+      secondaryMessageParts.push(msg)
     }
     if (approvedBy.length > 0) {
       const text = `already approved by: ${approvedBy}`
       const msg = markup.makeText(text, { withMentions: false })
 
-      message.push(msg)
+      secondaryMessageParts.push(msg)
     }
 
-    return markup.addLineBreaks(message)
+    const secondaryMessage = markup.makeAdditionalInfo(secondaryMessageParts)
+    const message = markup.composeBody(primaryMessage, secondaryMessage)
+
+    return message
   }
 
   __getConfigSetting = (settingName, defaultValue = null) => {
