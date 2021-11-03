@@ -5,6 +5,7 @@ const UnapprovedRequestDescription = require("./unapproved/UnapprovedRequestDesc
 
 const logger = require("../utils/logger")
 const markupUtils = require("../utils/markup")
+const { NetworkError } = require("../utils/errors")
 
 class Unapproved extends BaseCommand {
   perform = () => {
@@ -16,12 +17,17 @@ class Unapproved extends BaseCommand {
       .then(this.__buildMessage)
       .then(message => {
         this.logger.info("Sending message")
-        this.logger.info(message)
+        this.logger.info(JSON.stringify(message))
         return message
       })
       .then(this.messenger.send)
       .catch(err => {
-        logger.error(err)
+        if (err instanceof NetworkError) {
+          logger.error(err)
+        } else {
+          console.error(err) // eslint-disable-line no-console
+        }
+
         process.exit(1)
       })
   }
