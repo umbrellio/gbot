@@ -13,12 +13,11 @@ gitlab:
   - 43
   - 44
   groups:
-    list:
-    - 2
-    - 3
-    excludeProjects:
-    - 11
-    - 12
+  - id: 4
+    excluded: [1, 2, 3]
+  - id: 5
+    excluded: [11, 12]
+  - id: 6
 
 # tasks config
 unapproved:

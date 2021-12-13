@@ -50,14 +50,12 @@ messenger:
 gitlab:
   token: "<TOKEN>"                     # GitLab Private Access Token
   url: "<gitlab api url>"              # Gitlab API base url
-  projects:                            # List of your project ids
+  projects:                            # List of your project ids (optional if groups are defined)
   - 42
-  groups:                              # List of your project’s groups
-    list:
-    - 3
-    excludeProjects:                   # List of projects to exclude from the groups projects
-    - 11
-    - 12
+  groups:                              # List of your project’s groups (optional if projects are defined)
+  - id: 4                              # Group id
+    excluded: [1, 2, 3]                # List of projects to exclude from the current group projects (optional)
+  - id: 5
 
 # tasks config
 unapproved:                            # Config for `unapproved` command
@@ -74,26 +72,7 @@ unapproved:                            # Config for `unapproved` command
   diffs: false                         # Show changed lines count or not (default - false)
 ```
 
-Example of calculating projects:
-
-```yml
-...
-gitlab:
-  ...
-  projects:
-  - 42
-  - 43
-  groups:
-    list:
-    - 3 # has projects with id 11, 12, 13, 14
-    - 4 # has projects with id 21, 22
-    excludeProjects:
-    - 11
-    - 12
-    - 21
-```
-
-With the config above projects `13`, `14`, `22`, `42`, `43,` will be used in the bot.
+Groups in the config are [Gitlab project groups](https://docs.gitlab.com/ee/user/group/). You may provide in your config both `projects` and `groups` settings.
 
 ## Contributing
 
