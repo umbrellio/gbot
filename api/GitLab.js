@@ -5,7 +5,6 @@ class GitLab {
   constructor ({ gitlab }) {
     this.baseUrl = gitlab.url
     this.token = gitlab.token
-    this.projects = gitlab.projects
   }
 
   approvals = (project, request) => {
@@ -31,6 +30,12 @@ class GitLab {
 
     const uri = this.__getUrl("projects", project, "merge_requests")
     return this.__getPaginated(uri, query)
+  }
+
+  groupProjects = group => {
+    const uri = this.__getUrl("groups", group, "projects")
+    return this.__getPaginated(uri)
+      .then(projects => projects.map(project => project.id))
   }
 
   discussions = (project, request) => {

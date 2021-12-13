@@ -45,13 +45,17 @@ messenger:
                                        # - "markdown" (for Mattermost)
                                        # - "slack" (for Slack)
   sender:
-    username: "@ubmrellio/gbot"        # Sender's display name
+    username: "@umbrellio/gbot"        # Sender's display name
     icon: "<icon url>"                 # Sender's icon url
 gitlab:
   token: "<TOKEN>"                     # GitLab Private Access Token
   url: "<gitlab api url>"              # Gitlab API base url
-  projects:                            # List of your project ids
+  projects:                            # List of your project ids (optional if groups are defined)
   - 42
+  groups:                              # List of your project’s groups (optional if projects are defined)
+  - id: 4                              # Group id
+    excluded: [1, 2, 3]                # List of projects to exclude from the current group projects (optional)
+  - id: 5
 
 # tasks config
 unapproved:                            # Config for `unapproved` command
@@ -67,6 +71,8 @@ unapproved:                            # Config for `unapproved` command
     commenters: false                  # Tag thread commenters or not (default - false)
   diffs: false                         # Show changed lines count or not (default - false)
 ```
+
+Groups in the config are [Gitlab project groups](https://docs.gitlab.com/ee/user/group/). You must specify the group or the project, or both.
 
 ## Contributing
 
