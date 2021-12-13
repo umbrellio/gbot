@@ -72,7 +72,7 @@ unapproved:                            # Config for `unapproved` command
   diffs: false                         # Show changed lines count or not (default - false)
 ```
 
-Groups in the config are [Gitlab project groups](https://docs.gitlab.com/ee/user/group/). You may provide in your config both `projects` and `groups` settings.
+Groups in the config are [Gitlab project groups](https://docs.gitlab.com/ee/user/group/). You must specify the group or the project, or both.
 
 ## Contributing
 
