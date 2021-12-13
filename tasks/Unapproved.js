@@ -9,11 +9,11 @@ const { NetworkError } = require("../utils/errors")
 
 class Unapproved extends BaseCommand {
   perform = () => {
-    const promises = this.projects.map(this.__getUnapprovedRequests)
-
-    return Promise.all(promises)
-      .then(_.flatten)
-      .then(requests => requests.sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at)))
+    return this.projects
+      .then(projects => Promise.all(projects.map(this.__getUnapprovedRequests)))
+      .then(requests => {
+        return requests.flat().sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at))
+      })
       .then(this.__buildMessage)
       .then(message => {
         this.logger.info("Sending message")

@@ -10,6 +10,15 @@ gitlab:
   url: "<gitlab api url>"
   projects:
   - 42
+  - 43
+  - 44
+  groups:
+    list:
+    - 2
+    - 3
+    excludeProjects:
+    - 11
+    - 12
 
 # tasks config
 unapproved:
