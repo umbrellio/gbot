@@ -50,12 +50,14 @@ messenger:
 gitlab:
   token: "<TOKEN>"                     # GitLab Private Access Token
   url: "<gitlab api url>"              # Gitlab API base url
-  projects:                            # List of your project ids (optional if groups are defined)
-  - 42
   groups:                              # List of your project’s groups (optional if projects are defined)
   - id: 4                              # Group id
     excluded: [1, 2, 3]                # List of projects to exclude from the current group projects (optional)
   - id: 5
+  projects:                            # List of your project (optional if groups are defined)
+  - id: 42                             # Project id
+    paths: src/**/*                    # List of paths that should be changed in merge requests
+  - id: 43
 
 # tasks config
 unapproved:                            # Config for `unapproved` command
