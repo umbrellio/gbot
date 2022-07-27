@@ -1,6 +1,7 @@
 messenger:
   webhook: "<WEBHOOK URL>"
   channel: "<CHANNEL>"
+  markup: slack
   sender:
     username: "@ubmrellio/gbot"
     icon: "<icon url>"
@@ -9,6 +10,14 @@ gitlab:
   url: "<gitlab api url>"
   projects:
   - 42
+  - 43
+  - 44
+  groups:
+  - id: 4
+    excluded: [1, 2, 3]
+  - id: 5
+    excluded: [11, 12]
+  - id: 6
 
 # tasks config
 unapproved:

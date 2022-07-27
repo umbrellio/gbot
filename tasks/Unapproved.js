@@ -3,33 +3,55 @@ const _ = require("lodash")
 const BaseCommand = require("./BaseCommand")
 const UnapprovedRequestDescription = require("./unapproved/UnapprovedRequestDescription")
 
+const logger = require("../utils/logger")
+const markupUtils = require("../utils/markup")
+const { NetworkError } = require("../utils/errors")
+
 class Unapproved extends BaseCommand {
   perform = () => {
-    const promises = this.projects.map(this.__getUnapprovedRequests)
-
-    return Promise.all(promises)
-      .then(_.flatten)
-      .then(requests => requests.sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at)))
+    return this.projects
+      .then(projects => Promise.all(projects.map(this.__getUnapprovedRequests)))
+      .then(requests => {
+        return requests.flat().sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at))
+      })
       .then(this.__buildMessage)
       .then(message => {
         this.logger.info("Sending message")
-        this.logger.info(message)
+        this.logger.info(JSON.stringify(message))
         return message
       })
       .then(this.messenger.send)
+      .catch(err => {
+        if (err instanceof NetworkError) {
+          logger.error(err)
+        } else {
+          console.error(err) // eslint-disable-line no-console
+        }
+
+        process.exit(1)
+      })
   }
 
   __buildMessage = requests => {
-    if (requests.length) {
-      const list = requests.map(this.__buildRequestDescription).join("\n")
-      const head = "#### Hey, there are a couple of requests waiting for your review"
+    const markup = markupUtils[this.config.messenger.markup]
 
-      return `${head}\n\n${list}`
+    if (requests.length) {
+      const list = requests.map(this.__buildRequestDescription).map(markup.addDivider)
+      const headText = "Hey, there are a couple of requests waiting for your review"
+
+      const header = markup.makeHeader(headText)
+      const bodyParts = markup.flatten(list)
+
+      const message = markup.composeMsg(header, bodyParts)
+      return message
     } else {
-      return [
-        "#### Hey, there is a couple of nothing",
-        "There are no pending requests! Let's do a new one!"
-      ].join("\n\n")
+      const headText = "Hey, there is a couple of nothing"
+      const bodyText = "There are no pending requests! Let's do a new one!"
+
+      const header = markup.makeHeader(headText)
+      const body = markup.makePrimaryInfo(markup.makeText(bodyText))
+      const message = markup.composeMsg(header, body)
+      return message
     }
   }
 

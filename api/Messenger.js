@@ -2,19 +2,19 @@ const _ = require("lodash")
 const network = require("../utils/network")
 
 class Messenger {
-  constructor({ messenger }) {
+  constructor ({ messenger }) {
     this.channel = _.get(messenger, "channel")
     this.webhook = _.get(messenger, "webhook")
     this.username = _.get(messenger, "sender.username", "Gbot")
     this.icon = _.get(messenger, "sender.icon", null)
   }
 
-  send = text => {
+  send = content => {
     const message = {
-      text,
+      ...content,
       channel: this.channel,
       username: this.username,
-      icon_url: this.icon
+      icon_url: this.icon,
     }
 
     return network.post(this.webhook, message)

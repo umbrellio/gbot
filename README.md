@@ -18,7 +18,7 @@ $ npm i @umbrellio/gbot
 
 ### `unapproved`
 
-Sends unapproved MR to mattermost / slack. MR will be ignored if it has WIP mark.
+Sends unapproved MRs to mattermost / slack. MR will be ignored if it has `Draft`/`WIP` mark.
 
 ```sh
 $ gbot unapproved -c /path/to/config/gbot.yaml
@@ -27,7 +27,7 @@ $ gbot unapproved -c /path/to/config/gbot.yaml
 ## Configuration
 
 Each setting can be set via environment variables.
-Each variable must starts with `GBOT_` prefix. Each double underline will be interpreted as nesting, for example:
+Each variable must start with `GBOT_` prefix. Double underscore is interpreted as nesting, for example:
 
 ```sh
 GBOT_GITLAB_TOKEN=token # { "gitlabToken": "token" }
@@ -40,14 +40,22 @@ Example of the config file:
 messenger:
   webhook: "<WEBHOOK URL>"             # Mattermost / Slack webhook
   channel: "<CHANNEL>"                 # Mattermost / Slack channel where will be messages sent
+  markup: "slack"                      # Messenger markup (default - "markdown").
+                                       # Possible values:
+                                       # - "markdown" (for Mattermost)
+                                       # - "slack" (for Slack)
   sender:
-    username: "@ubmrellio/gbot"        # Sender's display name
+    username: "@umbrellio/gbot"        # Sender's display name
     icon: "<icon url>"                 # Sender's icon url
 gitlab:
   token: "<TOKEN>"                     # GitLab Private Access Token
   url: "<gitlab api url>"              # Gitlab API base url
-  projects:                            # List of your project ids
+  projects:                            # List of your project ids (optional if groups are defined)
   - 42
+  groups:                              # List of your project’s groups (optional if projects are defined)
+  - id: 4                              # Group id
+    excluded: [1, 2, 3]                # List of projects to exclude from the current group projects (optional)
+  - id: 5
 
 # tasks config
 unapproved:                            # Config for `unapproved` command
@@ -60,7 +68,11 @@ unapproved:                            # Config for `unapproved` command
   tag:                                 # Specify who will be tagged in messenger
     approvers: false                   # Tag approvers or not (default - false)
     author: false                      # Tag author of PR or not (default - false)
+    commenters: false                  # Tag thread commenters or not (default - false)
+  diffs: false                         # Show changed lines count or not (default - false)
 ```
+
+Groups in the config are [Gitlab project groups](https://docs.gitlab.com/ee/user/group/). You must specify the group or the project, or both.
 
 ## Contributing
 

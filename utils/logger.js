@@ -13,4 +13,4 @@ module.exports = winston.createLogger({
   format: winston.format.combine(winston.format.timestamp(), format),
   exceptionHandlers: transports,
   transports,
-});
+})

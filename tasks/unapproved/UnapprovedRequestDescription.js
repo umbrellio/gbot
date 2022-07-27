@@ -2,36 +2,57 @@ const _ = require("lodash")
 const gitUtils = require("../../utils/git")
 const timeUtils = require("../../utils/time")
 const stringUtils = require("../../utils/strings")
+const markupUtils = require("../../utils/markup")
 
 class UnapprovedRequestDescription {
-  constructor(request, config) {
+  constructor (request, config) {
     this.config = config
     this.request = request
   }
 
   build = () => {
-    const updated = new Date(this.request.updated_at)
-    const reaction = this.__getEmoji(updated)
+    const markup = markupUtils[this.config.messenger.markup]
 
-    const link = `[${this.request.title}](${this.request.web_url})`
+    const updated = new Date(this.request.updated_at)
+
+    const reaction = this.__getEmoji(updated)
+    const link = markup.makeLink(this.request.title, this.request.web_url)
     const author = this.__authorString()
-    const project = `[${this.request.project.name}](${this.request.project.web_url})`
+    const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
     const unresolvedAuthors = this.__unresolvedAuthorsString()
     const approvedBy = this.__approvedByString()
     const optionalDiff = this.__optionalDiffString()
 
-    const parts = [reaction, optionalDiff, `**${link}**`, `(${project})`, `by **${author}**`]
-
-    let message = [_.compact(parts).join(" ")]
+    const requestMessageParts = [
+      reaction,
+      markup.makeBold(link),
+      `(${projectLink})`,
+      optionalDiff,
+      `by ${markup.makeBold(author)}`,
+    ]
+    const requestMessageText = _.compact(requestMessageParts).join(" ")
+    const primaryMessage = markup.makePrimaryInfo(
+      markup.makeText(requestMessageText, { withMentions: false }),
+    )
+    const secondaryMessageParts = []
 
     if (unresolvedAuthors.length > 0) {
-      message.push(`unresolved threads by: ${unresolvedAuthors}`)
+      const text = `unresolved threads by: ${unresolvedAuthors}`
+      const msg = markup.makeText(text, { withMentions: true })
+
+      secondaryMessageParts.push(msg)
     }
     if (approvedBy.length > 0) {
-      message.push(`already approved by: ${approvedBy}`)
+      const text = `already approved by: ${approvedBy}`
+      const msg = markup.makeText(text, { withMentions: false })
+
+      secondaryMessageParts.push(msg)
     }
 
-    return message.join("\n")
+    const secondaryMessage = markup.makeAdditionalInfo(secondaryMessageParts)
+    const message = markup.composeBody(primaryMessage, secondaryMessage)
+
+    return message
   }
 
   __getConfigSetting = (settingName, defaultValue = null) => {
@@ -111,18 +132,18 @@ class UnapprovedRequestDescription {
       _.partialRight(
         _.filter,
         discussion => discussion.notes.some(
-          note => note.resolvable && !note.resolved
-        )
+          note => note.resolvable && !note.resolved,
+        ),
       ),
       _.partialRight(_.map, selectNotes),
       _.partialRight(
         _.map,
-        notes => notes.map(note => note.author)
+        notes => notes.map(note => note.author),
       ),
       _.partialRight(_.flatten),
       _.partialRight(
         _.uniqBy,
-        author => author.username
+        author => author.username,
       ),
     )
 
