@@ -13,6 +13,7 @@
   "dependencies": {
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
+    "minimatch": "^5.1.0",
     "winston": "^3.3.3",
     "yargs": "^17.3.0"
   },

@@ -19,7 +19,7 @@ class BaseCommand {
 
   get projects () {
     const configProjects = _.get(this.config, "gitlab.projects", [])
-    const groups = _.get(this.config, "gitlab.groups")
+    const groups = _.get(this.config, "gitlab.groups", [])
 
     if (_.isEmpty(configProjects) && _.isEmpty(groups)) {
       throw new Error("You should provide projects or groups in your config")
@@ -35,7 +35,9 @@ class BaseCommand {
     })
 
     return Promise.all(promises)
-      .then(projects => _.uniq([...configProjects, ...projects.flat()]))
+      .then(groupProjects => groupProjects.flat().map(id => ({ id })))
+      .then(groupProjects => [...configProjects, ...groupProjects])
+      .then(totalProjects => _.uniqBy(totalProjects, ({ id }) => id))
   }
 }
 
