@@ -26,8 +26,8 @@ class UnapprovedRequestDescription {
     const requestMessageParts = [
       reaction,
       markup.makeBold(link),
-      optionalDiff,
       `(${projectLink})`,
+      optionalDiff,
       `by ${markup.makeBold(author)}`,
     ]
     const requestMessageText = _.compact(requestMessageParts).join(" ")
