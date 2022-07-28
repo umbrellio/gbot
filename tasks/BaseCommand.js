@@ -27,17 +27,19 @@ class BaseCommand {
 
     if (_.isEmpty(groups)) return Promise.resolve(configProjects)
 
-    const promises = groups.map(group => {
-      return this.gitlab.groupProjects(group.id).then(groupProjects => {
-        const excludeProjects = group.excluded || []
-        return groupProjects.filter(p => !excludeProjects.includes(p))
-      })
-    })
+    const promises = groups.map(({ id, excluded = [] }) => (
+      this.gitlab.groupProjects(id).then(groupProjects => (
+        groupProjects.filter(p => !excluded.includes(p))
+      ))
+    ))
 
-    return Promise.all(promises)
-      .then(groupProjects => groupProjects.flatMap(id => ({ id })))
-      .then(groupProjects => [...configProjects, ...groupProjects])
-      .then(totalProjects => _.uniqBy(totalProjects, ({ id }) => id))
+    const mergeProjects = _.flow([
+      groupProjects => groupProjects.flat().map(id => ({ id })),
+      groupProjects => [...configProjects, ...groupProjects],
+      totalProjects => _.uniqBy(totalProjects, ({ id }) => id),
+    ])
+
+    return Promise.all(promises).then(mergeProjects)
   }
 }
 
