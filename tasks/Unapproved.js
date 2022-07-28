@@ -1,4 +1,5 @@
 const _ = require("lodash")
+const minimatch = require("minimatch")
 
 const BaseCommand = require("./BaseCommand")
 const UnapprovedRequestDescription = require("./unapproved/UnapprovedRequestDescription")
@@ -42,16 +43,15 @@ class Unapproved extends BaseCommand {
       const header = markup.makeHeader(headText)
       const bodyParts = markup.flatten(list)
 
-      const message = markup.composeMsg(header, bodyParts)
-      return message
+      return markup.composeMsg(header, bodyParts)
     } else {
       const headText = "Hey, there is a couple of nothing"
       const bodyText = "There are no pending requests! Let's do a new one!"
 
       const header = markup.makeHeader(headText)
       const body = markup.makePrimaryInfo(markup.makeText(bodyText))
-      const message = markup.composeMsg(header, body)
-      return message
+
+      return markup.composeMsg(header, body)
     }
   }
 
@@ -61,15 +61,29 @@ class Unapproved extends BaseCommand {
     return descriptionBuilder.build()
   }
 
-  __getUnapprovedRequests = projectId => this.__getExtendedRequests(projectId)
+  __getUnapprovedRequests = project => this.__getExtendedRequests(project.id)
     .then(requests => requests.filter(req => {
       const isCompleted = !req.work_in_progress
       const isUnapproved = req.approvals_left > 0
       const hasUnresolvedDiscussions = req.discussions.some(dis => {
         return dis.notes.some(note => note.resolvable && !note.resolved)
       })
-      return isCompleted && (isUnapproved || hasUnresolvedDiscussions)
+      const hasPathsChanges = this.__hasPathsChanges(req.changes, project.paths)
+
+      return isCompleted && hasPathsChanges && (isUnapproved || hasUnresolvedDiscussions)
     }))
+
+  __hasPathsChanges = (changes, paths) => {
+    if (_.isEmpty(paths)) {
+      return true
+    }
+
+    return changes.some(change => (
+      paths.some(path => (
+        minimatch(change.old_path, path) || minimatch(change.new_path, path)
+      ))
+    ))
+  }
 
   __getExtendedRequests = projectId => this.gitlab
     .project(projectId)

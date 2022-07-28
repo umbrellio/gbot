@@ -1,6 +1,6 @@
 {
   "name": "@umbrellio/gbot",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "bin": "gbot",
   "repository": "git@github.com:umbrellio/gbot.git",
   "author": "Aleksei Bespalov <nulldefiner@gmail.com>",
@@ -13,6 +13,7 @@
   "dependencies": {
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
+    "minimatch": "^5.1.0",
     "winston": "^3.3.3",
     "yargs": "^17.3.0"
   },
