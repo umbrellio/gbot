@@ -35,7 +35,7 @@ class BaseCommand {
     })
 
     return Promise.all(promises)
-      .then(groupProjects => groupProjects.flat().map(id => ({ id })))
+      .then(groupProjects => groupProjects.flatMap(id => ({ id })))
       .then(groupProjects => [...configProjects, ...groupProjects])
       .then(totalProjects => _.uniqBy(totalProjects, ({ id }) => id))
   }

@@ -56,7 +56,8 @@ gitlab:
   - id: 5
   projects:                            # List of your project (optional if groups are defined)
   - id: 42                             # Project id
-    paths: src/**/*                    # List of paths that should be changed in merge requests
+    paths:                             # List of paths that should be changed in merge requests
+    - src/**/*
   - id: 43
 
 # tasks config

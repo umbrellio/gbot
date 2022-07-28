@@ -78,8 +78,8 @@ class Unapproved extends BaseCommand {
       return true
     }
 
-    return _.some(changes, change => (
-      _.some(paths, path => (
+    return changes.some(change => (
+      paths.some(path => (
         minimatch(change.old_path, path) || minimatch(change.new_path, path)
       ))
     ))
