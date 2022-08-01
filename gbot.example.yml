@@ -9,9 +9,9 @@ gitlab:
   token: "<TOKEN>"
   url: "<gitlab api url>"
   projects:
-  - 42
-  - 43
-  - 44
+  - id: 42
+  - id: 43
+  - id: 44
   groups:
   - id: 4
     excluded: [1, 2, 3]
@@ -30,3 +30,4 @@ unapproved:
     author: false
     commenters: false
   diffs: false
+  split_to_and_under_review: false
