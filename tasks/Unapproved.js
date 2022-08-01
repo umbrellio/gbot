@@ -85,7 +85,6 @@ class Unapproved extends BaseCommand {
       markup.makeBold,
       markup.makeText,
       markup.makePrimaryInfo,
-      // x => markup.addDivider([x]),
     )
 
     const toReviewSection = makeSection("Unapproved")
