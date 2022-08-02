@@ -52,10 +52,10 @@ class Unapproved extends BaseCommand {
   }
 
   __buildRequestsMessage = (requests, markup) => {
-    const splitToAndUnderReview =
-      this.__getConfigSetting("unapproved.split_to_and_under_review")
+    const splitByReviewProgress =
+      this.__getConfigSetting("unapproved.splitByReviewProgress")
 
-    if (splitToAndUnderReview) {
+    if (splitByReviewProgress) {
       return this.__buildToAndUnderReviewMessage(requests, markup)
     }
 

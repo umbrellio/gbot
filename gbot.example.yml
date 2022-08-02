@@ -30,4 +30,4 @@ unapproved:
     author: false
     commenters: false
   diffs: false
-  split_to_and_under_review: false
+  splitByReviewProgress: false
