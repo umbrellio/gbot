@@ -73,6 +73,7 @@ unapproved:                            # Config for `unapproved` command
     author: false                      # Tag author of PR or not (default - false)
     commenters: false                  # Tag thread commenters or not (default - false)
   diffs: false                         # Show changed lines count or not (default - false)
+  splitByReviewProgress: false         # Whether to split the requests into those completely without review and those that under review
 ```
 
 Groups in the config are [Gitlab project groups](https://docs.gitlab.com/ee/user/group/). You must specify the group or the project, or both.
