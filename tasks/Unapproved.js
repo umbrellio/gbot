@@ -56,7 +56,7 @@ class Unapproved extends BaseCommand {
       this.__getConfigSetting("unapproved.splitByReviewProgress")
 
     if (splitByReviewProgress) {
-      return this.__buildToAndUnderReviewMessage(requests, markup)
+      return this.__buildByReviewProgressMessage(requests, markup)
     }
 
     return this.__buildGeneralRequestsMessage(requests, markup)
@@ -75,7 +75,7 @@ class Unapproved extends BaseCommand {
   __buildGeneralRequestsMessage = (requests, markup) => requests
     .map(this.__buildRequestDescription).map(markup.addDivider)
 
-  __buildToAndUnderReviewMessage = (requests, markup) => {
+  __buildByReviewProgressMessage = (requests, markup) => {
     const messages = []
     const [toReviewRequests, underReviewRequests] = _.partition(requests, req => (
       req.approvals_left > 0 && !this.__isRequestUnderReview(req)
