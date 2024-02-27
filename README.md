@@ -74,7 +74,7 @@ unapproved:                            # Config for `unapproved` command
     commenters: false                  # Tag thread commenters or not (default - false)
   diffs: false                         # Show changed lines count or not (default - false)
   splitByReviewProgress: false         # Whether to split the requests into those completely without review and those that under review
-  requestsPerMessage: 15               # Requests count per message
+  requestsPerMessage: 15               # Merge requests count per message
 ```
 
 Groups in the config are [Gitlab project groups](https://docs.gitlab.com/ee/user/group/). You must specify the group or the project, or both.
