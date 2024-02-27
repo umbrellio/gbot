@@ -17,7 +17,7 @@ class Messenger {
       icon_url: this.icon,
     }
 
-    return network.post(this.webhook, message)
+    return network.post(this.webhook, content)
   }
 
   sendMany = messages => Promise.all(
