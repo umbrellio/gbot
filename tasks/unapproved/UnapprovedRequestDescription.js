@@ -42,6 +42,7 @@ class UnapprovedRequestDescription {
 
       secondaryMessageParts.push(msg)
     }
+
     if (approvedBy.length > 0) {
       const text = `already approved by: ${approvedBy}`
       const msg = markup.makeText(text, { withMentions: false })
@@ -50,9 +51,7 @@ class UnapprovedRequestDescription {
     }
 
     const secondaryMessage = markup.makeAdditionalInfo(secondaryMessageParts)
-    const message = markup.composeBody(primaryMessage, secondaryMessage)
-
-    return message
+    return markup.composeBody(primaryMessage, secondaryMessage)
   }
 
   __getConfigSetting = (settingName, defaultValue = null) => {

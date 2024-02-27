@@ -65,20 +65,11 @@ class Unapproved extends BaseCommand {
     const splitByReviewProgress =
       this.__getConfigSetting("unapproved.splitByReviewProgress")
 
-    return this.__chunkRequests(requests).map(chunk => {
-      if (splitByReviewProgress) {
-        return this.__buildByReviewProgressMessage(chunk, markup)
-      }
+    if (splitByReviewProgress) {
+      return this.__buildByReviewProgressMessages(requests, markup)
+    }
 
-      return this.__buildGeneralRequestsMessage(chunk, markup)
-    })
-  }
-
-  __chunkRequests = requests => {
-    const requestsPerMessage = this.__getConfigSetting("messenger.requestsPerMessage")
-    if (!requestsPerMessage) return [requests]
-
-    return _.chunk(requests, requestsPerMessage)
+    return this.__buildGeneralRequestsMessages(requests, markup)
   }
 
   __buildEmptyListMessage = markup => {
@@ -91,10 +82,7 @@ class Unapproved extends BaseCommand {
     return markup.withHeader(header, body)
   }
 
-  __buildGeneralRequestsMessage = (requests, markup) => requests
-    .map(this.__buildRequestDescription).map(markup.addDivider)
-
-  __buildByReviewProgressMessage = (requests, markup) => {
+  __buildByReviewProgressMessages = (requests, markup) => {
     const messages = []
     const [toReviewRequests, underReviewRequests] = _.partition(requests, req => (
       req.approvals_left > 0 && !this.__isRequestUnderReview(req)
@@ -109,13 +97,31 @@ class Unapproved extends BaseCommand {
     const toReviewSection = makeSection("Unapproved")
     const underReviewSection = makeSection("Under review")
 
-    const toReviewMessage = this.__buildGeneralRequestsMessage(toReviewRequests, markup)
-    const underReviewMessage = this.__buildGeneralRequestsMessage(underReviewRequests, markup)
+    const toReviewMessages = this.__buildGeneralRequestsMessages(toReviewRequests, markup)
+    const underReviewMessages = this.__buildGeneralRequestsMessages(underReviewRequests, markup)
 
-    toReviewMessage.length && messages.push(toReviewSection, ...toReviewMessage)
-    underReviewMessage.length && messages.push(underReviewSection, ...underReviewMessage)
+    toReviewMessages.forEach((chunk, idx) => {
+      messages.push(idx === 0 ? [toReviewSection, ...chunk] : chunk)
+    })
+
+    underReviewMessages.forEach((chunk, idx) => {
+      messages.push(idx === 0 ? [underReviewSection, ...chunk] : chunk)
+    })
 
     return messages
+  }
+
+  __buildGeneralRequestsMessages = (requests, markup) => (
+    this.__chunkRequests(requests).map(chunk => (
+      chunk.map(this.__buildRequestDescription).map(markup.addDivider)
+    ))
+  )
+
+  __chunkRequests = requests => {
+    const requestsPerMessage = this.__getConfigSetting("messenger.requestsPerMessage")
+    if (!requestsPerMessage) return [requests]
+
+    return _.chunk(requests, requestsPerMessage)
   }
 
   __buildRequestDescription = request =>
