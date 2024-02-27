@@ -9,9 +9,9 @@ class Messenger {
     this.icon = _.get(messenger, "sender.icon", null)
   }
 
-  send = content => {
-    const message = {
-      ...content,
+  send = message => {
+    const content = {
+      ...message,
       channel: this.channel,
       username: this.username,
       icon_url: this.icon,
@@ -19,6 +19,10 @@ class Messenger {
 
     return network.post(this.webhook, message)
   }
+
+  sendMany = messages => Promise.all(
+    _.castArray(messages).map(message => this.send(message)),
+  )
 }
 
 module.exports = Messenger

@@ -47,6 +47,7 @@ messenger:
   sender:
     username: "@umbrellio/gbot"        # Sender's display name
     icon: "<icon url>"                 # Sender's icon url
+  requestsPerMessage: 15               # Requests count per message
 gitlab:
   token: "<TOKEN>"                     # GitLab Private Access Token
   url: "<gitlab api url>"              # Gitlab API base url

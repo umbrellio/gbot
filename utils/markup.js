@@ -9,10 +9,9 @@ const markdown = {
   makeHeader: text => `#### ${text}`,
   addDivider: parts => `${parts} \n`,
   flatten: parts => parts.join("\n"),
+  withHeader: (header, body) => `${header}\n\n${body}`,
   composeBody: (main, secondary) => _.compact([main, secondary]).join("\n"),
-  composeMsg: (header, body) => ({
-    text: `${header}\n\n${body}`,
-  }),
+  composeMsg: body => ({ text: body }),
 }
 
 const slack = {
@@ -40,13 +39,12 @@ const slack = {
   }),
   addDivider: parts => [...parts, { type: "divider" }],
   flatten: parts => parts.flat(),
+  withHeader: (header, body) => ([
+    ..._.castArray(header),
+    ..._.castArray(body),
+  ]),
   composeBody: (main, secondary) => _.compact([main, secondary]),
-  composeMsg: (header, body) => ({
-    blocks: [
-      ..._.castArray(header),
-      ..._.castArray(body),
-    ],
-  }),
+  composeMsg: body => ({ blocks: _.castArray(body) }),
 }
 
 module.exports = { slack, markdown }

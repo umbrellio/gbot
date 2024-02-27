@@ -13,13 +13,9 @@ class Unapproved extends BaseCommand {
     return this.projects
       .then(projects => Promise.all(projects.map(this.__getUnapprovedRequests)))
       .then(this.__sortRequests)
-      .then(this.__buildMessage)
-      .then(message => {
-        this.logger.info("Sending message")
-        this.logger.info(JSON.stringify(message))
-        return message
-      })
-      .then(this.messenger.send)
+      .then(this.__buildMessages)
+      .then(this.__logMessages)
+      .then(this.messenger.sendMany)
       .catch(err => {
         if (err instanceof NetworkError) {
           logger.error(err)
@@ -31,35 +27,58 @@ class Unapproved extends BaseCommand {
       })
   }
 
-  __buildMessage = requests => {
+  __buildMessages = requests => {
     const markup = markupUtils[this.__getConfigSetting("messenger.markup")]
 
     if (requests.length) {
-      return this.__buildListMessage(requests, markup)
+      return this.__buildListMessages(requests, markup)
     } else {
-      return this.__buildEmptyListMessage(requests, markup)
+      return this.__buildEmptyListMessage(markup)
     }
   }
 
-  __buildListMessage = (requests, markup) => {
-    const headText = "Hey, there are a couple of requests waiting for your review"
-    const list = this.__buildRequestsMessage(requests, markup)
-
-    const header = markup.makeHeader(headText)
-    const bodyParts = markup.flatten(list)
-
-    return markup.composeMsg(header, bodyParts)
+  __logMessages = messages => {
+    this.logger.info("Sending messages")
+    this.logger.info(JSON.stringify(messages))
+    return messages
   }
 
-  __buildRequestsMessage = (requests, markup) => {
+  __buildListMessages = (requests, markup) => {
+    const headText = "Hey, there are a couple of requests waiting for your review"
+    const messages = this.__buildRequestsMessages(requests, markup)
+    const header = markup.makeHeader(headText)
+
+    return messages.map((message, idx) => {
+      const parts = markup.flatten(message)
+
+      if (idx === 0) {
+        return markup.composeMsg(
+          markup.withHeader(header, parts),
+        )
+      }
+
+      return markup.composeMsg(parts)
+    })
+  }
+
+  __buildRequestsMessages = (requests, markup) => {
     const splitByReviewProgress =
       this.__getConfigSetting("unapproved.splitByReviewProgress")
 
-    if (splitByReviewProgress) {
-      return this.__buildByReviewProgressMessage(requests, markup)
-    }
+    return this.__chunkRequests(requests).map(chunk => {
+      if (splitByReviewProgress) {
+        return this.__buildByReviewProgressMessage(chunk, markup)
+      }
 
-    return this.__buildGeneralRequestsMessage(requests, markup)
+      return this.__buildGeneralRequestsMessage(chunk, markup)
+    })
+  }
+
+  __chunkRequests = requests => {
+    const requestsPerMessage = this.__getConfigSetting("messenger.requestsPerMessage")
+    if (!requestsPerMessage) return [requests]
+
+    return _.chunk(requests, requestsPerMessage)
   }
 
   __buildEmptyListMessage = markup => {
@@ -69,7 +88,7 @@ class Unapproved extends BaseCommand {
     const header = markup.makeHeader(headText)
     const body = markup.makePrimaryInfo(markup.makeText(bodyText))
 
-    return markup.composeMsg(header, body)
+    return markup.withHeader(header, body)
   }
 
   __buildGeneralRequestsMessage = (requests, markup) => requests

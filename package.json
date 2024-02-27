@@ -1,6 +1,6 @@
 {
   "name": "@umbrellio/gbot",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "bin": "gbot",
   "repository": "git@github.com:umbrellio/gbot.git",
   "author": "Aleksei Bespalov <nulldefiner@gmail.com>",
