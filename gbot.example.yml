@@ -5,7 +5,6 @@ messenger:
   sender:
     username: "@ubmrellio/gbot"
     icon: "<icon url>"
-  requestsPerMessage: 15
 gitlab:
   token: "<TOKEN>"
   url: "<gitlab api url>"
@@ -32,3 +31,4 @@ unapproved:
     commenters: false
   diffs: false
   splitByReviewProgress: false
+  requestsPerMessage: 15

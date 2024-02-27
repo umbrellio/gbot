@@ -47,7 +47,6 @@ messenger:
   sender:
     username: "@umbrellio/gbot"        # Sender's display name
     icon: "<icon url>"                 # Sender's icon url
-  requestsPerMessage: 15               # Requests count per message
 gitlab:
   token: "<TOKEN>"                     # GitLab Private Access Token
   url: "<gitlab api url>"              # Gitlab API base url
@@ -75,6 +74,7 @@ unapproved:                            # Config for `unapproved` command
     commenters: false                  # Tag thread commenters or not (default - false)
   diffs: false                         # Show changed lines count or not (default - false)
   splitByReviewProgress: false         # Whether to split the requests into those completely without review and those that under review
+  requestsPerMessage: 15               # Requests count per message
 ```
 
 Groups in the config are [Gitlab project groups](https://docs.gitlab.com/ee/user/group/). You must specify the group or the project, or both.
