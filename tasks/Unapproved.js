@@ -118,7 +118,7 @@ class Unapproved extends BaseCommand {
   )
 
   __chunkRequests = requests => {
-    const requestsPerMessage = this.__getConfigSetting("messenger.requestsPerMessage")
+    const requestsPerMessage = this.__getConfigSetting("unapproved.requestsPerMessage")
     if (!requestsPerMessage) return [requests]
 
     return _.chunk(requests, requestsPerMessage)
