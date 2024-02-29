@@ -12,14 +12,16 @@ class UnapprovedRequestDescription {
 
   build = () => {
     const markup = markupUtils[this.config.messenger.markup]
+    const tagOnThreadsOpen = this.__getConfigSetting("unapproved.tag.onThreadsOpen", false)
 
     const updated = new Date(this.request.updated_at)
 
     const reaction = this.__getEmoji(updated)
     const link = markup.makeLink(this.request.title, this.request.web_url)
-    const author = this.__authorString()
     const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
     const unresolvedAuthors = this.__unresolvedAuthorsString()
+    const shouldTagAuthor = tagOnThreadsOpen && unresolvedAuthors.length > 0
+    const author = this.__authorString({ forceTag: shouldTagAuthor })
     const approvedBy = this.__approvedByString()
     const optionalDiff = this.__optionalDiffString()
 
@@ -38,7 +40,7 @@ class UnapprovedRequestDescription {
 
     if (unresolvedAuthors.length > 0) {
       const text = `unresolved threads by: ${unresolvedAuthors}`
-      const msg = markup.makeText(text, { withMentions: true })
+      const msg = markup.makeText(text, { withMentions: tagOnThreadsOpen })
 
       secondaryMessageParts.push(msg)
     }
@@ -94,14 +96,12 @@ class UnapprovedRequestDescription {
     }).join(", ")
   }
 
-  __authorString = () => {
-    const tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
-    let message = `@${this.request.author.username}`
+  __authorString = ({ forceTag }) => {
+    let tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
+    tagAuthor ||= forceTag
 
-    if (!tagAuthor) {
-      message = stringUtils.wrapString(message)
-    }
-    return message
+    const message = `@${this.request.author.username}`
+    return tagAuthor ? message : stringUtils.wrapString(message)
   }
 
   __optionalDiffString = () => {

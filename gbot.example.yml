@@ -29,6 +29,7 @@ unapproved:
     approvers: false
     author: false
     commenters: false
+    onThreadsOpen: false
   diffs: false
   splitByReviewProgress: false
   requestsPerMessage: 15
