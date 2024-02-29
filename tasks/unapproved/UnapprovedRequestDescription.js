@@ -30,7 +30,7 @@ class UnapprovedRequestDescription {
       markup.makeBold(link),
       `(${projectLink})`,
       optionalDiff,
-      `by ${markup.makeBold(author)}`,
+      `by ${author}`,
     ]
     const requestMessageText = _.compact(requestMessageParts).join(" ")
     const primaryMessage = markup.makePrimaryInfo(
@@ -85,23 +85,19 @@ class UnapprovedRequestDescription {
     const tagApprovers = this.__getConfigSetting("unapproved.tag.approvers", false)
 
     return this.request.approved_by.map(approve => {
-      const { user } = approve
-      let message = `@${user.username}`
-
-      if (!tagApprovers) {
-        message = stringUtils.wrapString(message)
-      }
-
-      return message
+      const message = `@${approve.user.username}`
+      return tagApprovers ? message : stringUtils.wrapString(message)
     }).join(", ")
   }
 
-  __authorString = ({ forceTag }) => {
+  __authorString = (markup, { forceTag }) => {
     let tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
     tagAuthor ||= forceTag
 
     const message = `@${this.request.author.username}`
-    return tagAuthor ? message : stringUtils.wrapString(message)
+    if (tagAuthor) return message
+
+    return markup.makeBold(stringUtils.wrapString(message))
   }
 
   __optionalDiffString = () => {
@@ -109,7 +105,6 @@ class UnapprovedRequestDescription {
 
     if (showDiff) {
       const [ insertions, deletions ] = this.__getTotalDiff()
-
       return stringUtils.wrapString(`+${insertions} -${deletions}`)
     }
 
