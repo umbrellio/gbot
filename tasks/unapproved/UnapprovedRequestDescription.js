@@ -21,7 +21,7 @@ class UnapprovedRequestDescription {
     const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
     const unresolvedAuthors = this.__unresolvedAuthorsString()
     const shouldTagAuthor = tagOnThreadsOpen && unresolvedAuthors.length > 0
-    const author = this.__authorString({ forceTag: shouldTagAuthor })
+    const author = this.__authorString(markup, { forceTag: shouldTagAuthor })
     const approvedBy = this.__approvedByString()
     const optionalDiff = this.__optionalDiffString()
 
