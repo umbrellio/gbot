@@ -77,7 +77,7 @@ class UnapprovedRequestDescription {
 
   __unresolvedAuthorsString = () => {
     return this.__unresolvedAuthorsFor(this.request).map(author => {
-      return `@${author.username}`
+      return `@${this.__getSlackNickname(author)}`
     }).join(", ")
   }
 
@@ -85,7 +85,7 @@ class UnapprovedRequestDescription {
     const tagApprovers = this.__getConfigSetting("unapproved.tag.approvers", false)
 
     return this.request.approved_by.map(approve => {
-      const message = `@${approve.user.username}`
+      const message = `@${this.__getSlackNickname(approve.user.username)}`
       return tagApprovers ? message : stringUtils.wrapString(message)
     }).join(", ")
   }
@@ -94,10 +94,15 @@ class UnapprovedRequestDescription {
     let tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
     tagAuthor ||= forceTag
 
-    const message = `@${this.request.author.username}`
+    const message = `@${this.__getSlackNickname(this.request.author.username)}`
     if (tagAuthor) return message
 
     return markup.makeBold(stringUtils.wrapString(message))
+  }
+
+  __getSlackNickname = nickname => {
+    const mapping = this.__getConfigSetting("gitlab.nickname_mapping", {})
+    return mapping[nickname] || nickname
   }
 
   __optionalDiffString = () => {
@@ -113,12 +118,10 @@ class UnapprovedRequestDescription {
 
   __unresolvedAuthorsFor = () => {
     const tagCommenters = this.__getConfigSetting("unapproved.tag.commenters", false)
-
     const { discussions } = this.request
 
     const selectNotes = discussion => {
       const [issueNote, ...comments] = discussion.notes
-
       return tagCommenters ? [issueNote, ...comments] : [issueNote]
     }
 
