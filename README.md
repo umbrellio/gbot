@@ -59,6 +59,8 @@ gitlab:
     paths:                             # List of paths that should be changed in merge requests
     - src/**/*
   - id: 43
+  nickname_mapping:
+    pavel: "pahan2000"                 # Mapping of Gitlab nickname to Slack nickname
 
 # tasks config
 unapproved:                            # Config for `unapproved` command

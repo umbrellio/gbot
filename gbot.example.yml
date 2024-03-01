@@ -18,6 +18,8 @@ gitlab:
   - id: 5
     excluded: [11, 12]
   - id: 6
+  nickname_mapping:
+    pavel: pahan2000
 
 # tasks config
 unapproved:
