@@ -77,7 +77,7 @@ class UnapprovedRequestDescription {
 
   __unresolvedAuthorsString = () => {
     return this.__unresolvedAuthorsFor(this.request).map(author => {
-      return `@${this.__getSlackNickname(author)}`
+      return `@${this.__getSlackNickname(author.username)}`
     }).join(", ")
   }
 
