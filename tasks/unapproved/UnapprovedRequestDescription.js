@@ -23,7 +23,7 @@ class UnapprovedRequestDescription {
     const unresolvedAuthors = this.__unresolvedAuthorsString(markup)
     const tagAuthorOnThread = tagOnThreadsOpen && unresolvedAuthors.length > 0
     const authorString = this.__authorString(
-      markup, author.username, { tag: tagAuthor || tagAuthorOnThread, bold: true },
+      markup, author.username, { tag: tagAuthor || tagAuthorOnThread },
     )
     const approvedBy = this.__approvedByString(markup)
     const optionalDiff = this.__optionalDiffString()
@@ -95,10 +95,6 @@ class UnapprovedRequestDescription {
   __authorString = (markup, username, { tag = false, bold = false } = {}) => {
     if (tag) {
       return this.__getSlackMentionString(username)
-    }
-
-    if (bold) {
-      return markup.makeBold(stringUtils.wrapString(username))
     }
 
     return stringUtils.wrapString(username)
