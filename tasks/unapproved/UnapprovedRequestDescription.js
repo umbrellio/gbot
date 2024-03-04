@@ -94,7 +94,7 @@ class UnapprovedRequestDescription {
 
   __authorString = (markup, username, { tag = false, bold = false } = {}) => {
     if (tag) {
-      return `<@${this.__getUserSlackID(username)}>`
+      return this.__getSlackMentionString(username)
     }
 
     if (bold) {
@@ -104,9 +104,13 @@ class UnapprovedRequestDescription {
     return stringUtils.wrapString(username)
   }
 
-  __getUserSlackID = username => {
+  __getSlackMentionString = username => {
     const mapping = this.__getConfigSetting("messenger.usernameToSlackIDMapping", {})
-    return mapping[username] || username
+
+    const id = mapping[username]
+    if (!id) return username
+
+    return `<@${id}>`
   }
 
   __optionalDiffString = () => {
