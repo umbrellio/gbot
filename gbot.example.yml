@@ -1,10 +1,13 @@
 messenger:
-  webhook: "<WEBHOOK URL>"
+  url: https://slack.com/api/chat.postMessage
+  token: "<TOKEN>"
   channel: "<CHANNEL>"
   markup: slack
   sender:
     username: "@ubmrellio/gbot"
     icon: "<icon url>"
+  usernameToSlackIDMapping:
+    pavel: U020DSB741G
 gitlab:
   token: "<TOKEN>"
   url: "<gitlab api url>"
@@ -18,8 +21,6 @@ gitlab:
   - id: 5
     excluded: [11, 12]
   - id: 6
-  nickname_mapping:
-    pavel: pahan2000
 
 # tasks config
 unapproved:

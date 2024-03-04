@@ -12,17 +12,20 @@ class UnapprovedRequestDescription {
 
   build = () => {
     const markup = markupUtils[this.config.messenger.markup]
+    const tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
     const tagOnThreadsOpen = this.__getConfigSetting("unapproved.tag.onThreadsOpen", false)
 
-    const updated = new Date(this.request.updated_at)
+    const { author, updated } = this.request
 
-    const reaction = this.__getEmoji(updated)
+    const reaction = this.__getEmoji(new Date(updated))
     const link = markup.makeLink(this.request.title, this.request.web_url)
     const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
-    const unresolvedAuthors = this.__unresolvedAuthorsString()
-    const shouldTagAuthor = tagOnThreadsOpen && unresolvedAuthors.length > 0
-    const author = this.__authorString(markup, { forceTag: shouldTagAuthor })
-    const approvedBy = this.__approvedByString()
+    const unresolvedAuthors = this.__unresolvedAuthorsString(markup)
+    const tagAuthorOnThread = tagOnThreadsOpen && unresolvedAuthors.length > 0
+    const authorString = this.__authorString(
+      markup, author.username, { tag: tagAuthor || tagAuthorOnThread, bold: true },
+    )
+    const approvedBy = this.__approvedByString(markup)
     const optionalDiff = this.__optionalDiffString()
 
     const requestMessageParts = [
@@ -30,7 +33,7 @@ class UnapprovedRequestDescription {
       markup.makeBold(link),
       `(${projectLink})`,
       optionalDiff,
-      `by ${author}`,
+      `by ${authorString}`,
     ]
     const requestMessageText = _.compact(requestMessageParts).join(" ")
     const primaryMessage = markup.makePrimaryInfo(
@@ -75,34 +78,35 @@ class UnapprovedRequestDescription {
     return findEmoji(emoji) || emoji.default || ""
   }
 
-  __unresolvedAuthorsString = () => {
-    return this.__unresolvedAuthorsFor(this.request).map(author => {
-      return `@${this.__getSlackNickname(author.username)}`
-    }).join(", ")
+  __unresolvedAuthorsString = markup => {
+    return this.__unresolvedAuthorsFor(this.request).map(author => (
+      this.__authorString(markup, author.username, { tag: true })
+    )).join(", ")
   }
 
-  __approvedByString = () => {
-    const tagApprovers = this.__getConfigSetting("unapproved.tag.approvers", false)
+  __approvedByString = markup => {
+    const tag = this.__getConfigSetting("unapproved.tag.approvers", false)
 
-    return this.request.approved_by.map(approve => {
-      const message = `@${this.__getSlackNickname(approve.user.username)}`
-      return tagApprovers ? message : stringUtils.wrapString(message)
-    }).join(", ")
+    return this.request.approved_by.map(approve => (
+      this.__authorString(markup, approve.user.username, { tag })
+    )).join(", ")
   }
 
-  __authorString = (markup, { forceTag }) => {
-    let tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
-    tagAuthor ||= forceTag
+  __authorString = (markup, username, { tag = false, bold = false } = {}) => {
+    if (tag) {
+      return `<@${this.__getUserSlackID(username)}>`
+    }
 
-    const message = `@${this.__getSlackNickname(this.request.author.username)}`
-    if (tagAuthor) return message
+    if (bold) {
+      return markup.makeBold(stringUtils.wrapString(username))
+    }
 
-    return markup.makeBold(stringUtils.wrapString(message))
+    return stringUtils.wrapString(username)
   }
 
-  __getSlackNickname = nickname => {
-    const mapping = this.__getConfigSetting("gitlab.nickname_mapping", {})
-    return mapping[nickname] || nickname
+  __getUserSlackID = username => {
+    const mapping = this.__getConfigSetting("messenger.usernameToSlackIDMapping", {})
+    return mapping[username] || username
   }
 
   __optionalDiffString = () => {

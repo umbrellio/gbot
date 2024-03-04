@@ -36,7 +36,7 @@ const get = (uri, params = {}, headers = {}) => new Promise((resolve, reject) =>
   }).on("error", reject)
 })
 
-const post = (to, body) => new Promise((resolve, reject) => {
+const post = (to, body, headers = {}) => new Promise((resolve, reject) => {
   const uri = new url.URL(to)
   const data = JSON.stringify(body)
   const request = {
@@ -47,6 +47,7 @@ const post = (to, body) => new Promise((resolve, reject) => {
     headers: {
       "Content-Type": "application/json",
       "Content-Length": Buffer.byteLength(data),
+      ...headers,
     },
   }
 

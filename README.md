@@ -38,7 +38,8 @@ Example of the config file:
 
 ```yml
 messenger:
-  webhook: "<WEBHOOK URL>"             # Mattermost / Slack webhook
+  url: "<chat.postMessage URL>"        # Slack chat.postMessage endpoint
+  token: "<TOKEN>"                     # Slack token with chat:write scope
   channel: "<CHANNEL>"                 # Mattermost / Slack channel where will be messages sent
   markup: "slack"                      # Messenger markup (default - "markdown").
                                        # Possible values:
@@ -47,6 +48,8 @@ messenger:
   sender:
     username: "@umbrellio/gbot"        # Sender's display name
     icon: "<icon url>"                 # Sender's icon url
+  usernameToSlackIDMapping:
+    pavel: "U020DSB741G"               # Mapping of Gitlab username to Slack ID
 gitlab:
   token: "<TOKEN>"                     # GitLab Private Access Token
   url: "<gitlab api url>"              # Gitlab API base url
@@ -59,8 +62,6 @@ gitlab:
     paths:                             # List of paths that should be changed in merge requests
     - src/**/*
   - id: 43
-  nickname_mapping:
-    pavel: "pahan2000"                 # Mapping of Gitlab nickname to Slack nickname
 
 # tasks config
 unapproved:                            # Config for `unapproved` command

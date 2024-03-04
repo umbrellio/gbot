@@ -79,7 +79,7 @@ class Unapproved extends BaseCommand {
     const header = markup.makeHeader(headText)
     const body = markup.makePrimaryInfo(markup.makeText(bodyText))
 
-    return markup.withHeader(header, body)
+    return markup.composeMsg(markup.withHeader(header, body))
   }
 
   __buildByReviewProgressMessages = (requests, markup) => {

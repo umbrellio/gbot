@@ -3,8 +3,10 @@ const network = require("../utils/network")
 
 class Messenger {
   constructor ({ messenger }) {
+    this.url = _.get(messenger, "url")
+    this.token = _.get(messenger, "token")
+    this.headers = { Authorization: `Bearer ${this.token}` }
     this.channel = _.get(messenger, "channel")
-    this.webhook = _.get(messenger, "webhook")
     this.username = _.get(messenger, "sender.username", "Gbot")
     this.icon = _.get(messenger, "sender.icon", null)
   }
@@ -17,7 +19,7 @@ class Messenger {
       icon_url: this.icon,
     }
 
-    return network.post(this.webhook, content)
+    return network.post(this.url, content, this.headers)
   }
 
   sendMany = messages => Promise.all(
