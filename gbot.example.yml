@@ -6,8 +6,9 @@ messenger:
   sender:
     username: "@ubmrellio/gbot"
     icon: "<icon url>"
-  usernameToSlackIDMapping:
-    pavel: U020DSB741G
+  slack:
+    usernameMapping:
+      pavel: U020DSB741G
 gitlab:
   token: "<TOKEN>"
   url: "<gitlab api url>"

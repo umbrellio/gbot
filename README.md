@@ -48,8 +48,9 @@ messenger:
   sender:
     username: "@umbrellio/gbot"        # Sender's display name
     icon: "<icon url>"                 # Sender's icon url
-  usernameToSlackIDMapping:
-    pavel: "U020DSB741G"               # Mapping of Gitlab username to Slack ID
+  slack:
+    usernameMapping:
+      pavel: "U020DSB741G"             # Mapping of Gitlab username to Slack ID
 gitlab:
   token: "<TOKEN>"                     # GitLab Private Access Token
   url: "<gitlab api url>"              # Gitlab API base url

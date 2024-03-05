@@ -20,12 +20,12 @@ class UnapprovedRequestDescription {
     const reaction = this.__getEmoji(new Date(updated))
     const link = markup.makeLink(this.request.title, this.request.web_url)
     const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
-    const unresolvedAuthors = this.__unresolvedAuthorsString()
+    const unresolvedAuthors = this.__unresolvedAuthorsString(markup)
     const tagAuthorOnThread = tagOnThreadsOpen && unresolvedAuthors.length > 0
     const authorString = this.__authorString(
       markup, author.username, { tag: tagAuthor || tagAuthorOnThread },
     )
-    const approvedBy = this.__approvedByString()
+    const approvedBy = this.__approvedByString(markup)
     const optionalDiff = this.__optionalDiffString()
 
     const requestMessageParts = [
@@ -78,35 +78,31 @@ class UnapprovedRequestDescription {
     return findEmoji(emoji) || emoji.default || ""
   }
 
-  __unresolvedAuthorsString = () => {
+  __unresolvedAuthorsString = (markup) => {
     return this.__unresolvedAuthorsFor(this.request).map(author => (
-      this.__authorString(author.username, { tag: true })
+      this.__authorString(markup, author.username, { tag: true })
     )).join(", ")
   }
 
-  __approvedByString = () => {
+  __approvedByString = markup => {
     const tag = this.__getConfigSetting("unapproved.tag.approvers", false)
 
     return this.request.approved_by.map(approve => (
-      this.__authorString(approve.user.username, { tag })
+      this.__authorString(markup, approve.user.username, { tag })
     )).join(", ")
   }
 
   __authorString = (markup, username, { tag = false } = {}) => {
     if (tag) {
-      return this.__getSlackMentionString(username)
+      return this.__getMentionString(markup, username)
     }
 
-    return stringUtils.wrapString(username)
+    return stringUtils.wrapString(`@${username}`)
   }
 
-  __getSlackMentionString = username => {
-    const mapping = this.__getConfigSetting("messenger.usernameToSlackIDMapping", {})
-
-    const id = mapping[username]
-    if (!id) return username
-
-    return `<@${id}>`
+  __getMentionString = (markup, username) => {
+    const mapping = this.__getConfigSetting(`messenger.${markup.type}.usernameMapping`, {})
+    return markup.mention(username, mapping)
   }
 
   __optionalDiffString = () => {
