@@ -22,9 +22,11 @@ class Messenger {
     return network.post(this.url, content, this.headers)
   }
 
-  sendMany = messages => Promise.all(
-    _.castArray(messages).map(message => this.send(message)),
-  )
+  sendMany = messages => {
+    _.castArray(messages).forEach((message, idx) => {
+      _.delay(() => this.send(message), 100 * idx)
+    })
+  }
 }
 
 module.exports = Messenger
