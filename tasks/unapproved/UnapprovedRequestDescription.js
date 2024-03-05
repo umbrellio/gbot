@@ -20,12 +20,12 @@ class UnapprovedRequestDescription {
     const reaction = this.__getEmoji(new Date(updated))
     const link = markup.makeLink(this.request.title, this.request.web_url)
     const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
-    const unresolvedAuthors = this.__unresolvedAuthorsString(markup)
+    const unresolvedAuthors = this.__unresolvedAuthorsString()
     const tagAuthorOnThread = tagOnThreadsOpen && unresolvedAuthors.length > 0
     const authorString = this.__authorString(
       markup, author.username, { tag: tagAuthor || tagAuthorOnThread },
     )
-    const approvedBy = this.__approvedByString(markup)
+    const approvedBy = this.__approvedByString()
     const optionalDiff = this.__optionalDiffString()
 
     const requestMessageParts = [
@@ -78,21 +78,21 @@ class UnapprovedRequestDescription {
     return findEmoji(emoji) || emoji.default || ""
   }
 
-  __unresolvedAuthorsString = markup => {
+  __unresolvedAuthorsString = () => {
     return this.__unresolvedAuthorsFor(this.request).map(author => (
-      this.__authorString(markup, author.username, { tag: true })
+      this.__authorString(author.username, { tag: true })
     )).join(", ")
   }
 
-  __approvedByString = markup => {
+  __approvedByString = () => {
     const tag = this.__getConfigSetting("unapproved.tag.approvers", false)
 
     return this.request.approved_by.map(approve => (
-      this.__authorString(markup, approve.user.username, { tag })
+      this.__authorString(approve.user.username, { tag })
     )).join(", ")
   }
 
-  __authorString = (markup, username, { tag = false, bold = false } = {}) => {
+  __authorString = (markup, username, { tag = false } = {}) => {
     if (tag) {
       return this.__getSlackMentionString(username)
     }
