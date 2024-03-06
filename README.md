@@ -38,7 +38,8 @@ Example of the config file:
 
 ```yml
 messenger:
-  webhook: "<WEBHOOK URL>"             # Mattermost / Slack webhook
+  url: "<chat.postMessage URL>"        # Slack chat.postMessage endpoint
+  token: "<TOKEN>"                     # Slack token with chat:write scope
   channel: "<CHANNEL>"                 # Mattermost / Slack channel where will be messages sent
   markup: "slack"                      # Messenger markup (default - "markdown").
                                        # Possible values:
@@ -47,6 +48,9 @@ messenger:
   sender:
     username: "@umbrellio/gbot"        # Sender's display name
     icon: "<icon url>"                 # Sender's icon url
+  slack:
+    usernameMapping:
+      pavel: "U020DSB741G"             # Mapping of Gitlab username to Slack ID
 gitlab:
   token: "<TOKEN>"                     # GitLab Private Access Token
   url: "<gitlab api url>"              # Gitlab API base url
@@ -72,8 +76,10 @@ unapproved:                            # Config for `unapproved` command
     approvers: false                   # Tag approvers or not (default - false)
     author: false                      # Tag author of PR or not (default - false)
     commenters: false                  # Tag thread commenters or not (default - false)
+    onThreadsOpen: false               # Whether to tag thread authors and PR author when threads are present
   diffs: false                         # Show changed lines count or not (default - false)
   splitByReviewProgress: false         # Whether to split the requests into those completely without review and those that under review
+  requestsPerMessage: 15               # Merge requests count per message
 ```
 
 Groups in the config are [Gitlab project groups](https://docs.gitlab.com/ee/user/group/). You must specify the group or the project, or both.

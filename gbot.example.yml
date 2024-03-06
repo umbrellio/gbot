@@ -1,10 +1,14 @@
 messenger:
-  webhook: "<WEBHOOK URL>"
+  url: https://slack.com/api/chat.postMessage
+  token: "<TOKEN>"
   channel: "<CHANNEL>"
   markup: slack
   sender:
     username: "@ubmrellio/gbot"
     icon: "<icon url>"
+  slack:
+    usernameMapping:
+      pavel: U020DSB741G
 gitlab:
   token: "<TOKEN>"
   url: "<gitlab api url>"
@@ -29,5 +33,7 @@ unapproved:
     approvers: false
     author: false
     commenters: false
+    onThreadsOpen: false
   diffs: false
   splitByReviewProgress: false
+  requestsPerMessage: 15

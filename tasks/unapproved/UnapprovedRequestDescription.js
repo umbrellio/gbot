@@ -12,15 +12,20 @@ class UnapprovedRequestDescription {
 
   build = () => {
     const markup = markupUtils[this.config.messenger.markup]
+    const tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
+    const tagOnThreadsOpen = this.__getConfigSetting("unapproved.tag.onThreadsOpen", false)
 
-    const updated = new Date(this.request.updated_at)
+    const { author, updated } = this.request
 
-    const reaction = this.__getEmoji(updated)
+    const reaction = this.__getEmoji(new Date(updated))
     const link = markup.makeLink(this.request.title, this.request.web_url)
-    const author = this.__authorString()
     const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
-    const unresolvedAuthors = this.__unresolvedAuthorsString()
-    const approvedBy = this.__approvedByString()
+    const unresolvedAuthors = this.__unresolvedAuthorsString(markup)
+    const tagAuthorOnThread = tagOnThreadsOpen && unresolvedAuthors.length > 0
+    const authorString = this.__authorString(
+      markup, author.username, { tag: tagAuthor || tagAuthorOnThread },
+    )
+    const approvedBy = this.__approvedByString(markup)
     const optionalDiff = this.__optionalDiffString()
 
     const requestMessageParts = [
@@ -28,7 +33,7 @@ class UnapprovedRequestDescription {
       markup.makeBold(link),
       `(${projectLink})`,
       optionalDiff,
-      `by ${markup.makeBold(author)}`,
+      `by ${authorString}`,
     ]
     const requestMessageText = _.compact(requestMessageParts).join(" ")
     const primaryMessage = markup.makePrimaryInfo(
@@ -38,10 +43,11 @@ class UnapprovedRequestDescription {
 
     if (unresolvedAuthors.length > 0) {
       const text = `unresolved threads by: ${unresolvedAuthors}`
-      const msg = markup.makeText(text, { withMentions: true })
+      const msg = markup.makeText(text, { withMentions: tagOnThreadsOpen })
 
       secondaryMessageParts.push(msg)
     }
+
     if (approvedBy.length > 0) {
       const text = `already approved by: ${approvedBy}`
       const msg = markup.makeText(text, { withMentions: false })
@@ -50,9 +56,7 @@ class UnapprovedRequestDescription {
     }
 
     const secondaryMessage = markup.makeAdditionalInfo(secondaryMessageParts)
-    const message = markup.composeBody(primaryMessage, secondaryMessage)
-
-    return message
+    return markup.composeBody(primaryMessage, secondaryMessage)
   }
 
   __getConfigSetting = (settingName, defaultValue = null) => {
@@ -74,35 +78,31 @@ class UnapprovedRequestDescription {
     return findEmoji(emoji) || emoji.default || ""
   }
 
-  __unresolvedAuthorsString = () => {
-    return this.__unresolvedAuthorsFor(this.request).map(author => {
-      return `@${author.username}`
-    }).join(", ")
+  __unresolvedAuthorsString = (markup) => {
+    return this.__unresolvedAuthorsFor(this.request).map(author => (
+      this.__authorString(markup, author.username, { tag: true })
+    )).join(", ")
   }
 
-  __approvedByString = () => {
-    const tagApprovers = this.__getConfigSetting("unapproved.tag.approvers", false)
+  __approvedByString = markup => {
+    const tag = this.__getConfigSetting("unapproved.tag.approvers", false)
 
-    return this.request.approved_by.map(approve => {
-      const { user } = approve
-      let message = `@${user.username}`
-
-      if (!tagApprovers) {
-        message = stringUtils.wrapString(message)
-      }
-
-      return message
-    }).join(", ")
+    return this.request.approved_by.map(approve => (
+      this.__authorString(markup, approve.user.username, { tag })
+    )).join(", ")
   }
 
-  __authorString = () => {
-    const tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
-    let message = `@${this.request.author.username}`
-
-    if (!tagAuthor) {
-      message = stringUtils.wrapString(message)
+  __authorString = (markup, username, { tag = false } = {}) => {
+    if (tag) {
+      return this.__getMentionString(markup, username)
     }
-    return message
+
+    return stringUtils.wrapString(`@${username}`)
+  }
+
+  __getMentionString = (markup, username) => {
+    const mapping = this.__getConfigSetting(`messenger.${markup.type}.usernameMapping`, {})
+    return markup.mention(username, mapping)
   }
 
   __optionalDiffString = () => {
@@ -110,7 +110,6 @@ class UnapprovedRequestDescription {
 
     if (showDiff) {
       const [ insertions, deletions ] = this.__getTotalDiff()
-
       return stringUtils.wrapString(`+${insertions} -${deletions}`)
     }
 
@@ -119,12 +118,10 @@ class UnapprovedRequestDescription {
 
   __unresolvedAuthorsFor = () => {
     const tagCommenters = this.__getConfigSetting("unapproved.tag.commenters", false)
-
     const { discussions } = this.request
 
     const selectNotes = discussion => {
       const [issueNote, ...comments] = discussion.notes
-
       return tagCommenters ? [issueNote, ...comments] : [issueNote]
     }
 
