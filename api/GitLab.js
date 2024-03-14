@@ -26,6 +26,7 @@ class GitLab {
       state: "opened",
       scope: "all",
       wip: "no",
+      with_merge_status_recheck: true,
     }
 
     const uri = this.__getUrl("projects", project, "merge_requests")

@@ -14,10 +14,11 @@ class UnapprovedRequestDescription {
     const markup = markupUtils[this.config.messenger.markup]
     const tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
     const tagOnThreadsOpen = this.__getConfigSetting("unapproved.tag.onThreadsOpen", false)
+    const tagOnConflict = this.__getConfigSetting("unapproved.tag.onConflict", false)
 
-    const { author, updated } = this.request
+    const { author } = this.request
 
-    const reaction = this.__getEmoji(new Date(updated))
+    const reaction = this.__getEmoji(new Date(this.request.updated_at))
     const link = markup.makeLink(this.request.title, this.request.web_url)
     const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
     const unresolvedAuthors = this.__unresolvedAuthorsString(markup)
@@ -27,6 +28,7 @@ class UnapprovedRequestDescription {
     )
     const approvedBy = this.__approvedByString(markup)
     const optionalDiff = this.__optionalDiffString()
+    const hasConflicts = this.__hasConflicts()
 
     const requestMessageParts = [
       reaction,
@@ -55,6 +57,13 @@ class UnapprovedRequestDescription {
       secondaryMessageParts.push(msg)
     }
 
+    if (hasConflicts) {
+      const text = `conflicts: ${authorString}`
+      const msg = markup.makeText(text, { withMentions: tagOnConflict })
+
+      secondaryMessageParts.push(msg)
+    }
+
     const secondaryMessage = markup.makeAdditionalInfo(secondaryMessageParts)
     return markup.composeBody(primaryMessage, secondaryMessage)
   }
@@ -78,7 +87,7 @@ class UnapprovedRequestDescription {
     return findEmoji(emoji) || emoji.default || ""
   }
 
-  __unresolvedAuthorsString = (markup) => {
+  __unresolvedAuthorsString = markup => {
     return this.__unresolvedAuthorsFor(this.request).map(author => (
       this.__authorString(markup, author.username, { tag: true })
     )).join(", ")
@@ -159,6 +168,8 @@ class UnapprovedRequestDescription {
       _.partialRight(_.map, _.sum),
     )(changes)
   }
+
+  __hasConflicts = () => this.request.has_conflicts
 }
 
 module.exports = UnapprovedRequestDescription
