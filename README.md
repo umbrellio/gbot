@@ -77,6 +77,7 @@ unapproved:                            # Config for `unapproved` command
     author: false                      # Tag author of PR or not (default - false)
     commenters: false                  # Tag thread commenters or not (default - false)
     onThreadsOpen: false               # Whether to tag thread authors and PR author when threads are present
+    onConflict: false                  # Whether to tag PR author if there are conflicts
   diffs: false                         # Show changed lines count or not (default - false)
   splitByReviewProgress: false         # Whether to split the requests into those completely without review and those that under review
   requestsPerMessage: 15               # Merge requests count per message
