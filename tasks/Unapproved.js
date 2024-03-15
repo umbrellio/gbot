@@ -118,8 +118,7 @@ class Unapproved extends BaseCommand {
   )
 
   __chunkRequests = requests => {
-    const requestsPerMessage = this.__getConfigSetting("unapproved.requestsPerMessage")
-    if (!requestsPerMessage) return [requests]
+    const requestsPerMessage = this.__getConfigSetting("unapproved.requestsPerMessage", 10000)
 
     return _.chunk(requests, requestsPerMessage)
   }
@@ -136,8 +135,9 @@ class Unapproved extends BaseCommand {
       const isUnapproved = req.approvals_left > 0
       const isUnderReview = this.__isRequestUnderReview(req)
       const hasPathsChanges = this.__hasPathsChanges(req.changes, project.paths)
+      const hasConflicts = req.has_conflicts
 
-      return isCompleted && hasPathsChanges && (isUnapproved || isUnderReview)
+      return isCompleted && hasPathsChanges && (isUnapproved || isUnderReview || hasConflicts)
     }))
 
   __isRequestUnderReview = req => req.discussions
