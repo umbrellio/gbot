@@ -69,7 +69,7 @@ class Unapproved extends BaseCommand {
       return this.__buildByReviewProgressMessages(requests, markup)
     }
 
-    return this.__buildGeneralRequestsMessages(requests, markup)
+    return this.__buildGeneralRequestsMessages("unapproved", requests, markup)
   }
 
   __buildEmptyListMessage = markup => {
@@ -84,9 +84,17 @@ class Unapproved extends BaseCommand {
 
   __buildByReviewProgressMessages = (requests, markup) => {
     const messages = []
-    const [toReviewRequests, underReviewRequests] = _.partition(requests, req => (
-      req.approvals_left > 0 && !this.__isRequestUnderReview(req)
-    ))
+    const [toReviewRequests, underReviewRequests, reviewedWithConflicts] = _.values(
+      _.groupBy(requests, req => {
+        if (req.approvals_left > 0 && !this.__isRequestUnderReview(req)) {
+          return 0 // To review
+        } else if (this.__isRequestUnderReview(req)) {
+          return 1 // Under review
+        } else {
+          return 2 // Reviewed with conflicts
+        }
+      }),
+    )
 
     const makeSection = _.flow(
       markup.makeBold,
@@ -94,26 +102,29 @@ class Unapproved extends BaseCommand {
       markup.makePrimaryInfo,
     )
 
-    const toReviewSection = makeSection("Unapproved")
-    const underReviewSection = makeSection("Under review")
+    const sections = [
+      { type: "unapproved", name: "Unapproved", requests: toReviewRequests },
+      { type: "under_review", name: "Under review", requests: underReviewRequests },
+      { type: "conflicts", name: "With conflicts", requests: reviewedWithConflicts },
+    ]
 
-    const toReviewMessages = this.__buildGeneralRequestsMessages(toReviewRequests, markup)
-    const underReviewMessages = this.__buildGeneralRequestsMessages(underReviewRequests, markup)
+    sections.forEach(settings => {
+      const section = makeSection(settings.name)
+      const sectionMessages = this.__buildGeneralRequestsMessages(
+        settings.type, settings.requests, markup,
+      )
 
-    toReviewMessages.forEach((chunk, idx) => {
-      messages.push(idx === 0 ? [toReviewSection, ...chunk] : chunk)
-    })
-
-    underReviewMessages.forEach((chunk, idx) => {
-      messages.push(idx === 0 ? [underReviewSection, ...chunk] : chunk)
+      sectionMessages.forEach((chunk, idx) => {
+        messages.push(idx === 0 ? [section, ...chunk] : chunk)
+      })
     })
 
     return messages
   }
 
-  __buildGeneralRequestsMessages = (requests, markup) => (
+  __buildGeneralRequestsMessages = (type, requests, markup) => (
     this.__chunkRequests(requests).map(chunk => (
-      chunk.map(this.__buildRequestDescription).map(markup.addDivider)
+      chunk.map(request => this.__buildRequestDescription(type, request)).map(markup.addDivider)
     ))
   )
 
@@ -123,8 +134,8 @@ class Unapproved extends BaseCommand {
     return _.chunk(requests, requestsPerMessage)
   }
 
-  __buildRequestDescription = request =>
-    new UnapprovedRequestDescription(request, this.config).build()
+  __buildRequestDescription = (type, request) =>
+    new UnapprovedRequestDescription(type, request, this.config).build()
 
   __sortRequests = requests => requests
     .flat().sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at))
