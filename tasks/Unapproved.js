@@ -149,7 +149,7 @@ class Unapproved extends BaseCommand {
       const isUnapproved = req.approvals_left > 0
       const isUnderReview = this.__isRequestUnderReview(req)
       const hasPathsChanges = this.__hasPathsChanges(req.changes, project.paths)
-      const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
+      const checkConflicts = this.__getConfigSetting("checkConflicts", false)
       const hasConflicts = req.has_conflicts
       const check = checkConflicts
         ? isUnapproved || isUnderReview || hasConflicts

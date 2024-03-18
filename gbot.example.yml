@@ -37,5 +37,6 @@ unapproved:
     onConflict: false
   diffs: false
   splitByReviewProgress: false
-  checkConflicts: false
   requestsPerMessage: 15
+
+checkConflicts: false

@@ -22,7 +22,7 @@ class GitLab {
   project = id => this.__get(this.__getUrl("projects", id))
 
   requests = project => {
-    const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
+    const checkConflicts = this.__getConfigSetting("checkConflicts", false)
     const query = {
       sort: "asc",
       per_page: 100,

@@ -16,7 +16,7 @@ class UnapprovedRequestDescription {
     const tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
     const tagOnThreadsOpen = this.__getConfigSetting("unapproved.tag.onThreadsOpen", false)
     const tagOnConflict = this.__getConfigSetting("unapproved.tag.onConflict", false)
-    const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
+    const checkConflicts = this.__getConfigSetting("checkConflicts", false)
 
     const { author } = this.request
 
