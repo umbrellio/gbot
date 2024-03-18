@@ -1,10 +1,12 @@
+const _ = require("lodash")
 const url = require("../utils/url")
 const network = require("../utils/network")
 
 class GitLab {
-  constructor ({ gitlab }) {
-    this.baseUrl = gitlab.url
-    this.token = gitlab.token
+  constructor (config) {
+    this.config = config
+    this.baseUrl = config.gitlab.url
+    this.token = config.gitlab.token
   }
 
   approvals = (project, request) => {
@@ -20,13 +22,14 @@ class GitLab {
   project = id => this.__get(this.__getUrl("projects", id))
 
   requests = project => {
+    const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
     const query = {
       sort: "asc",
       per_page: 100,
       state: "opened",
       scope: "all",
       wip: "no",
-      with_merge_status_recheck: true,
+      with_merge_status_recheck: checkConflicts,
     }
 
     const uri = this.__getUrl("projects", project, "merge_requests")
@@ -67,6 +70,10 @@ class GitLab {
 
       return Promise.resolve(allResults)
     })
+  }
+
+  __getConfigSetting = (settingName, defaultValue = null) => {
+    return _.get(this.config, settingName, defaultValue)
   }
 }
 

@@ -92,7 +92,7 @@ class Unapproved extends BaseCommand {
           case req.approvals_left > 0 && !isUnderReview:
             return 0 // To review
           case isUnderReview:
-            return 1 // Reviewed with conflicts
+            return 1 // Under review
           default:
             return 2 // Reviewed with conflicts
         }
@@ -149,9 +149,13 @@ class Unapproved extends BaseCommand {
       const isUnapproved = req.approvals_left > 0
       const isUnderReview = this.__isRequestUnderReview(req)
       const hasPathsChanges = this.__hasPathsChanges(req.changes, project.paths)
+      const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
       const hasConflicts = req.has_conflicts
+      const check = checkConflicts
+        ? isUnapproved || isUnderReview || hasConflicts
+        : isUnapproved || isUnderReview
 
-      return isCompleted && hasPathsChanges && (isUnapproved || isUnderReview || hasConflicts)
+      return isCompleted && hasPathsChanges && check
     }))
 
   __isRequestUnderReview = req => req.discussions

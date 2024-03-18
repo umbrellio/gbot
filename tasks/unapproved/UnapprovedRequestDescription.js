@@ -16,6 +16,7 @@ class UnapprovedRequestDescription {
     const tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
     const tagOnThreadsOpen = this.__getConfigSetting("unapproved.tag.onThreadsOpen", false)
     const tagOnConflict = this.__getConfigSetting("unapproved.tag.onConflict", false)
+    const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
 
     const { author } = this.request
 
@@ -24,10 +25,11 @@ class UnapprovedRequestDescription {
     const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
     const unresolvedAuthors = this.__unresolvedAuthorsString(markup)
     const tagAuthorOnThread = tagOnThreadsOpen && unresolvedAuthors.length > 0
+    const tagAuthorInPrimaryMessage = this.type === "conflicts"
+      ? tagOnConflict
+      : tagAuthor || tagAuthorOnThread
     const authorString = this.__authorString(
-      markup,
-      author.username,
-      { tag: this.type === "conflicts" ? tagOnConflict : tagAuthor || tagAuthorOnThread },
+      markup, author.username, { tag: tagAuthorInPrimaryMessage },
     )
     const approvedBy = this.__approvedByString(markup)
     const optionalDiff = this.__optionalDiffString()
@@ -63,7 +65,7 @@ class UnapprovedRequestDescription {
       secondaryMessageParts.push(msg)
     }
 
-    if (hasConflicts) {
+    if (checkConflicts && hasConflicts) {
       const authorString = this.__authorString(markup, author.username, { tag: tagOnConflict })
       const text = `conflicts: ${authorString}`
       const msg = markup.makeText(text, { withMentions: tagOnConflict })
