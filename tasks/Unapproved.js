@@ -86,12 +86,15 @@ class Unapproved extends BaseCommand {
     const messages = []
     const [toReviewRequests, underReviewRequests, reviewedWithConflicts] = _.values(
       _.groupBy(requests, req => {
-        if (req.approvals_left > 0 && !this.__isRequestUnderReview(req)) {
-          return 0 // To review
-        } else if (this.__isRequestUnderReview(req)) {
-          return 1 // Under review
-        } else {
-          return 2 // Reviewed with conflicts
+        const isUnderReview = this.__isRequestUnderReview(req)
+
+        switch (true) {
+          case req.approvals_left > 0 && !isUnderReview:
+            return 0 // To review
+          case isUnderReview:
+            return 1 // Reviewed with conflicts
+          default:
+            return 2 // Reviewed with conflicts
         }
       }),
     )
