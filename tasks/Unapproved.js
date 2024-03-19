@@ -11,7 +11,7 @@ const { NetworkError } = require("../utils/errors")
 class Unapproved extends BaseCommand {
   perform = () => {
     return this.projects
-      .then(projects => Promise.all(projects.map(this.__getUnapprovedRequests)))
+      .then(projects => Promise.all(projects.map(this.__getApplicableRequests)))
       .then(this.__sortRequests)
       .then(this.__buildMessages)
       .then(this.__logMessages)
@@ -143,7 +143,7 @@ class Unapproved extends BaseCommand {
   __sortRequests = requests => requests
     .flat().sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at))
 
-  __getUnapprovedRequests = project => this.__getExtendedRequests(project.id)
+  __getApplicableRequests = project => this.__getExtendedRequests(project.id)
     .then(requests => requests.filter(req => {
       const isCompleted = !req.work_in_progress
       const isUnapproved = req.approvals_left > 0
@@ -151,11 +151,11 @@ class Unapproved extends BaseCommand {
       const hasPathsChanges = this.__hasPathsChanges(req.changes, project.paths)
       const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
       const hasConflicts = req.has_conflicts
-      const check = checkConflicts
+      const isApplicable = checkConflicts
         ? isUnapproved || isUnderReview || hasConflicts
         : isUnapproved || isUnderReview
 
-      return isCompleted && hasPathsChanges && check
+      return isCompleted && hasPathsChanges && isApplicable
     }))
 
   __isRequestUnderReview = req => req.discussions
