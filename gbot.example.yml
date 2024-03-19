@@ -38,3 +38,4 @@ unapproved:
   diffs: false
   splitByReviewProgress: false
   requestsPerMessage: 15
+  checkConflicts: false

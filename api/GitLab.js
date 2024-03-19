@@ -1,3 +1,4 @@
+const _ = require("lodash")
 const url = require("../utils/url")
 const network = require("../utils/network")
 
@@ -19,14 +20,14 @@ class GitLab {
 
   project = id => this.__get(this.__getUrl("projects", id))
 
-  requests = project => {
+  requests = (project, { withMergeStatusRecheck }) => {
     const query = {
       sort: "asc",
       per_page: 100,
       state: "opened",
       scope: "all",
       wip: "no",
-      with_merge_status_recheck: true,
+      with_merge_status_recheck: withMergeStatusRecheck,
     }
 
     const uri = this.__getUrl("projects", project, "merge_requests")

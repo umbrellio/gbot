@@ -5,9 +5,10 @@ const stringUtils = require("../../utils/strings")
 const markupUtils = require("../../utils/markup")
 
 class UnapprovedRequestDescription {
-  constructor (request, config) {
-    this.config = config
+  constructor (type, request, config) {
+    this.type = type
     this.request = request
+    this.config = config
   }
 
   build = () => {
@@ -15,6 +16,7 @@ class UnapprovedRequestDescription {
     const tagAuthor = this.__getConfigSetting("unapproved.tag.author", false)
     const tagOnThreadsOpen = this.__getConfigSetting("unapproved.tag.onThreadsOpen", false)
     const tagOnConflict = this.__getConfigSetting("unapproved.tag.onConflict", false)
+    const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
 
     const { author } = this.request
 
@@ -23,8 +25,11 @@ class UnapprovedRequestDescription {
     const projectLink = markup.makeLink(this.request.project.name, this.request.project.web_url)
     const unresolvedAuthors = this.__unresolvedAuthorsString(markup)
     const tagAuthorOnThread = tagOnThreadsOpen && unresolvedAuthors.length > 0
+    const tagAuthorInPrimaryMessage = this.type === "conflicts"
+      ? tagOnConflict
+      : tagAuthor || tagAuthorOnThread
     const authorString = this.__authorString(
-      markup, author.username, { tag: tagAuthor || tagAuthorOnThread },
+      markup, author.username, { tag: tagAuthorInPrimaryMessage },
     )
     const approvedBy = this.__approvedByString(markup)
     const optionalDiff = this.__optionalDiffString()
@@ -39,7 +44,10 @@ class UnapprovedRequestDescription {
     ]
     const requestMessageText = _.compact(requestMessageParts).join(" ")
     const primaryMessage = markup.makePrimaryInfo(
-      markup.makeText(requestMessageText, { withMentions: false }),
+      markup.makeText(
+        requestMessageText,
+        { withMentions: this.type === "conflicts" && tagOnConflict },
+      ),
     )
     const secondaryMessageParts = []
 
@@ -57,14 +65,17 @@ class UnapprovedRequestDescription {
       secondaryMessageParts.push(msg)
     }
 
-    if (hasConflicts) {
+    if (checkConflicts && hasConflicts) {
+      const authorString = this.__authorString(markup, author.username, { tag: tagOnConflict })
       const text = `conflicts: ${authorString}`
       const msg = markup.makeText(text, { withMentions: tagOnConflict })
 
       secondaryMessageParts.push(msg)
     }
 
-    const secondaryMessage = markup.makeAdditionalInfo(secondaryMessageParts)
+    const secondaryMessage = markup.makeAdditionalInfo(
+      this.type === "conflicts" ? [] : secondaryMessageParts,
+    )
     return markup.composeBody(primaryMessage, secondaryMessage)
   }
 

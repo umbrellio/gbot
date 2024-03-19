@@ -79,8 +79,9 @@ unapproved:                            # Config for `unapproved` command
     onThreadsOpen: false               # Whether to tag thread authors and PR author when threads are present
     onConflict: false                  # Whether to tag PR author if there are conflicts
   diffs: false                         # Show changed lines count or not (default - false)
-  splitByReviewProgress: false         # Whether to split the requests into those completely without review and those that under review
+  splitByReviewProgress: false         # Whether to split the requests into those completely without review, those that under review and those with conflicts
   requestsPerMessage: 15               # Merge requests count per message
+  checkConflicts: false                # Whether to check PR conflicts
 ```
 
 Groups in the config are [Gitlab project groups](https://docs.gitlab.com/ee/user/group/). You must specify the group or the project, or both.

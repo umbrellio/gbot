@@ -11,7 +11,7 @@ const { NetworkError } = require("../utils/errors")
 class Unapproved extends BaseCommand {
   perform = () => {
     return this.projects
-      .then(projects => Promise.all(projects.map(this.__getUnapprovedRequests)))
+      .then(projects => Promise.all(projects.map(this.__getApplicableRequests)))
       .then(this.__sortRequests)
       .then(this.__buildMessages)
       .then(this.__logMessages)
@@ -69,7 +69,7 @@ class Unapproved extends BaseCommand {
       return this.__buildByReviewProgressMessages(requests, markup)
     }
 
-    return this.__buildGeneralRequestsMessages(requests, markup)
+    return this.__buildGeneralRequestsMessages("unapproved", requests, markup)
   }
 
   __buildEmptyListMessage = markup => {
@@ -84,9 +84,20 @@ class Unapproved extends BaseCommand {
 
   __buildByReviewProgressMessages = (requests, markup) => {
     const messages = []
-    const [toReviewRequests, underReviewRequests] = _.partition(requests, req => (
-      req.approvals_left > 0 && !this.__isRequestUnderReview(req)
-    ))
+    const [toReviewRequests, underReviewRequests, reviewedWithConflicts] = _.values(
+      _.groupBy(requests, req => {
+        const isUnderReview = this.__isRequestUnderReview(req)
+
+        switch (true) {
+          case req.approvals_left > 0 && !isUnderReview:
+            return 0 // To review
+          case isUnderReview:
+            return 1 // Under review
+          default:
+            return 2 // Reviewed with conflicts
+        }
+      }),
+    )
 
     const makeSection = _.flow(
       markup.makeBold,
@@ -94,26 +105,29 @@ class Unapproved extends BaseCommand {
       markup.makePrimaryInfo,
     )
 
-    const toReviewSection = makeSection("Unapproved")
-    const underReviewSection = makeSection("Under review")
+    const sections = [
+      { type: "unapproved", name: "Unapproved", requests: toReviewRequests },
+      { type: "under_review", name: "Under review", requests: underReviewRequests },
+      { type: "conflicts", name: "With conflicts", requests: reviewedWithConflicts },
+    ]
 
-    const toReviewMessages = this.__buildGeneralRequestsMessages(toReviewRequests, markup)
-    const underReviewMessages = this.__buildGeneralRequestsMessages(underReviewRequests, markup)
+    sections.forEach(settings => {
+      const section = makeSection(settings.name)
+      const sectionMessages = this.__buildGeneralRequestsMessages(
+        settings.type, settings.requests, markup,
+      )
 
-    toReviewMessages.forEach((chunk, idx) => {
-      messages.push(idx === 0 ? [toReviewSection, ...chunk] : chunk)
-    })
-
-    underReviewMessages.forEach((chunk, idx) => {
-      messages.push(idx === 0 ? [underReviewSection, ...chunk] : chunk)
+      sectionMessages.forEach((chunk, idx) => {
+        messages.push(idx === 0 ? [section, ...chunk] : chunk)
+      })
     })
 
     return messages
   }
 
-  __buildGeneralRequestsMessages = (requests, markup) => (
+  __buildGeneralRequestsMessages = (type, requests, markup) => (
     this.__chunkRequests(requests).map(chunk => (
-      chunk.map(this.__buildRequestDescription).map(markup.addDivider)
+      chunk.map(request => this.__buildRequestDescription(type, request)).map(markup.addDivider)
     ))
   )
 
@@ -123,21 +137,25 @@ class Unapproved extends BaseCommand {
     return _.chunk(requests, requestsPerMessage)
   }
 
-  __buildRequestDescription = request =>
-    new UnapprovedRequestDescription(request, this.config).build()
+  __buildRequestDescription = (type, request) =>
+    new UnapprovedRequestDescription(type, request, this.config).build()
 
   __sortRequests = requests => requests
     .flat().sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at))
 
-  __getUnapprovedRequests = project => this.__getExtendedRequests(project.id)
+  __getApplicableRequests = project => this.__getExtendedRequests(project.id)
     .then(requests => requests.filter(req => {
       const isCompleted = !req.work_in_progress
       const isUnapproved = req.approvals_left > 0
       const isUnderReview = this.__isRequestUnderReview(req)
       const hasPathsChanges = this.__hasPathsChanges(req.changes, project.paths)
+      const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
       const hasConflicts = req.has_conflicts
+      const isApplicable = checkConflicts
+        ? isUnapproved || isUnderReview || hasConflicts
+        : isUnapproved || isUnderReview
 
-      return isCompleted && hasPathsChanges && (isUnapproved || isUnderReview || hasConflicts)
+      return isCompleted && hasPathsChanges && isApplicable
     }))
 
   __isRequestUnderReview = req => req.discussions
@@ -156,12 +174,19 @@ class Unapproved extends BaseCommand {
     ))
   }
 
-  __getExtendedRequests = projectId => this.gitlab
-    .project(projectId)
-    .then(project => this.gitlab.requests(project.id).then(requests => {
-      const promises = requests.map(request => this.__getExtendedRequest(project, request))
-      return Promise.all(promises)
-    }))
+  __getExtendedRequests = projectId => {
+    const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
+
+    return this.gitlab
+      .project(projectId)
+      .then(project => this.gitlab
+        .requests(project.id, { withMergeStatusRecheck: checkConflicts })
+        .then(requests => {
+          const promises = requests.map(request => this.__getExtendedRequest(project, request))
+          return Promise.all(promises)
+        }),
+      )
+  }
 
   __getExtendedRequest = (project, request) => Promise.resolve(request)
     .then(req => this.__appendApprovals(project, req))
