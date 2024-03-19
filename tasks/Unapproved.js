@@ -149,7 +149,7 @@ class Unapproved extends BaseCommand {
       const isUnapproved = req.approvals_left > 0
       const isUnderReview = this.__isRequestUnderReview(req)
       const hasPathsChanges = this.__hasPathsChanges(req.changes, project.paths)
-      const checkConflicts = this.__getConfigSetting("checkConflicts", false)
+      const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
       const hasConflicts = req.has_conflicts
       const check = checkConflicts
         ? isUnapproved || isUnderReview || hasConflicts
@@ -174,12 +174,19 @@ class Unapproved extends BaseCommand {
     ))
   }
 
-  __getExtendedRequests = projectId => this.gitlab
-    .project(projectId)
-    .then(project => this.gitlab.requests(project.id).then(requests => {
-      const promises = requests.map(request => this.__getExtendedRequest(project, request))
-      return Promise.all(promises)
-    }))
+  __getExtendedRequests = projectId => {
+    const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
+
+    return this.gitlab
+      .project(projectId)
+      .then(project => this.gitlab
+        .requests(project.id, { withMergeStatusRecheck: checkConflicts })
+        .then(requests => {
+          const promises = requests.map(request => this.__getExtendedRequest(project, request))
+          return Promise.all(promises)
+        }),
+      )
+  }
 
   __getExtendedRequest = (project, request) => Promise.resolve(request)
     .then(req => this.__appendApprovals(project, req))
