@@ -175,12 +175,10 @@ class Unapproved extends BaseCommand {
   }
 
   __getExtendedRequests = projectId => {
-    const checkConflicts = this.__getConfigSetting("unapproved.checkConflicts", false)
-
     return this.gitlab
       .project(projectId)
       .then(project => this.gitlab
-        .requests(project.id, { withMergeStatusRecheck: checkConflicts })
+        .requests(project.id)
         .then(requests => {
           const promises = requests.map(request => this.__getExtendedRequest(project, request))
           return Promise.all(promises)

@@ -20,14 +20,13 @@ class GitLab {
 
   project = id => this.__get(this.__getUrl("projects", id))
 
-  requests = (project, { withMergeStatusRecheck }) => {
+  requests = project => {
     const query = {
       sort: "asc",
       per_page: 100,
       state: "opened",
       scope: "all",
       wip: "no",
-      with_merge_status_recheck: withMergeStatusRecheck,
     }
 
     const uri = this.__getUrl("projects", project, "merge_requests")
