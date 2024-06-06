@@ -23,9 +23,9 @@ class Messenger {
   }
 
   sendMany = messages => {
-    _.castArray(messages).forEach((message, idx) => {
-      _.delay(() => this.send(message), 100 * idx)
-    })
+    return _.castArray(messages).reduce((promise, message) => {
+      return promise.then(() => this.send(message))
+    }, Promise.resolve())
   }
 }
 
