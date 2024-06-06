@@ -23,7 +23,7 @@ class Messenger {
   }
 
   sendMany = messages => {
-    return messages.reduce((promise, message) => {
+    return _.castArray(messages).reduce((promise, message) => {
       return promise.then(() => this.send(message))
     }, Promise.resolve())
   }
