@@ -16,6 +16,24 @@ const markdown = {
   composeMsg: body => ({ text: body }),
 }
 
+const slackText = {
+  type: "slackText",
+  makeLink: (title, url) => `<${url}|${title}>`,
+  makeText: text => text,
+  makePrimaryInfo: info => info,
+  makeAdditionalInfo: parts => parts.join("\n"),
+  makeBold: content => `*${content}*`,
+  makeHeader: text => `*${text}*`,
+  mention: (username, mapping) => (
+    mapping[username] ? `<@${mapping[username]}>` : `@${username}`
+  ),
+  addDivider: parts => `${parts} \n`,
+  flatten: parts => parts.join("\n"),
+  withHeader: (header, body) => `${header}\n\n${body}`,
+  composeBody: (main, secondary) => _.compact([main, secondary]).join("\n"),
+  composeMsg: body => ({ text: body }),
+}
+
 const slack = {
   type: "slack",
   makeLink: (title, url) => `<${url}|${title}>`,
@@ -53,4 +71,4 @@ const slack = {
   composeMsg: body => ({ blocks: _.castArray(body) }),
 }
 
-module.exports = { slack, markdown }
+module.exports = { slack, slackText, markdown }
