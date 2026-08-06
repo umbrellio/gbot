@@ -3,6 +3,7 @@ const gitUtils = require("../../utils/git")
 const timeUtils = require("../../utils/time")
 const stringUtils = require("../../utils/strings")
 const markupUtils = require("../../utils/markup")
+const userUtils = require("../../utils/users")
 
 class UnapprovedRequestDescription {
   constructor (type, request, config) {
@@ -29,7 +30,7 @@ class UnapprovedRequestDescription {
       ? tagOnConflict
       : tagAuthor || tagAuthorOnThread
     const authorString = this.__authorString(
-      markup, author.username, { tag: tagAuthorInPrimaryMessage },
+      markup, author, { tag: tagAuthorInPrimaryMessage },
     )
     const approvedBy = this.__approvedByString(markup)
     const optionalDiff = this.__optionalDiffString()
@@ -66,7 +67,7 @@ class UnapprovedRequestDescription {
     }
 
     if (checkConflicts && hasConflicts) {
-      const authorString = this.__authorString(markup, author.username, { tag: tagOnConflict })
+      const authorString = this.__authorString(markup, author, { tag: tagOnConflict })
       const text = `conflicts: ${authorString}`
       const msg = markup.makeText(text, { withMentions: tagOnConflict })
 
@@ -100,7 +101,7 @@ class UnapprovedRequestDescription {
 
   __unresolvedAuthorsString = markup => {
     return this.__unresolvedAuthorsFor(this.request).map(author => (
-      this.__authorString(markup, author.username, { tag: true })
+      this.__authorString(markup, author, { tag: true })
     )).join(", ")
   }
 
@@ -108,21 +109,21 @@ class UnapprovedRequestDescription {
     const tag = this.__getConfigSetting("unapproved.tag.approvers", false)
 
     return this.request.approved_by.map(approve => (
-      this.__authorString(markup, approve.user.username, { tag })
+      this.__authorString(markup, approve.user, { tag })
     )).join(", ")
   }
 
-  __authorString = (markup, username, { tag = false } = {}) => {
+  __authorString = (markup, user, { tag = false } = {}) => {
     if (tag) {
-      return this.__getMentionString(markup, username)
+      return this.__getMentionString(markup, user)
     }
 
-    return stringUtils.wrapString(`@${username}`)
+    return stringUtils.wrapString(`@${userUtils.displayName(user)}`)
   }
 
-  __getMentionString = (markup, username) => {
+  __getMentionString = (markup, user) => {
     const mapping = this.__getConfigSetting(`messenger.${markup.type}.usernameMapping`, {})
-    return markup.mention(username, mapping)
+    return markup.mention(user, mapping)
   }
 
   __optionalDiffString = () => {

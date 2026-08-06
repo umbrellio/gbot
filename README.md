@@ -50,7 +50,9 @@ messenger:
     icon: "<icon url>"                 # Sender's icon url
   slack:
     usernameMapping:
-      pavel: "U020DSB741G"             # Mapping of Gitlab username to Slack ID
+      pavel: "U020DSB741G"             # Mapping of Gitlab username to Slack ID.
+                                       # Users without a mapping are shown using
+                                       # their Gitlab display name.
 gitlab:
   token: "<TOKEN>"                     # GitLab Private Access Token
   url: "<gitlab api url>"              # Gitlab API base url

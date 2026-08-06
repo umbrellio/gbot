@@ -1,5 +1,7 @@
 const _ = require("lodash")
 
+const userUtils = require("./users")
+
 const markdown = {
   type: "markdown",
   makeLink: (title, url) => `[${title}](${url})`,
@@ -8,7 +10,7 @@ const markdown = {
   makeAdditionalInfo: parts => parts.join("\n"),
   makeBold: content => `**${content}**`,
   makeHeader: text => `#### ${text}`,
-  mention: (username, _mapping) => `@${username}`,
+  mention: (user, _mapping) => `@${userUtils.displayName(user)}`,
   addDivider: parts => `${parts} \n`,
   flatten: parts => parts.join("\n"),
   withHeader: (header, body) => `${header}\n\n${body}`,
@@ -24,8 +26,8 @@ const slackText = {
   makeAdditionalInfo: parts => parts.join("\n"),
   makeBold: content => `*${content}*`,
   makeHeader: text => `*${text}*`,
-  mention: (username, mapping) => (
-    mapping[username] ? `<@${mapping[username]}>` : `@${username}`
+  mention: (user, mapping) => (
+    mapping[user.username] ? `<@${mapping[user.username]}>` : `@${userUtils.displayName(user)}`
   ),
   addDivider: parts => `${parts} \n`,
   flatten: parts => parts.join("\n"),
@@ -58,8 +60,8 @@ const slack = {
       text,
     },
   }),
-  mention: (username, mapping) => (
-    mapping[username] ? `<@${mapping[username]}>` : `@${username}`
+  mention: (user, mapping) => (
+    mapping[user.username] ? `<@${mapping[user.username]}>` : `@${userUtils.displayName(user)}`
   ),
   addDivider: parts => [...parts, { type: "divider" }],
   flatten: parts => parts.flat(),
